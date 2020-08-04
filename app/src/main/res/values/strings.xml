@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">MusicTimer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Music Timer</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Themes</string>
+    <string name="menu_tracks">Tracks</string>
+
+    <string name="home_second">Home Second</string>
+
+    <string name="timerStart">Start</string>
+    <string name="timerStop">Stop</string>
+    <string name="timerReset">Reset</string>
+    <string name="timerResume">Resume</string>
+    <string name="timerStartTime">00:00</string>
+
+    <string name="cardTitle">Card Title</string>
+    <string name="selectImageDescription">Is theme selected</string>
+    <string name="loopImageDescription">Is theme looped</string>
+    <string name="randomImageDescription">Is theme random</string>
+    <string name="startEditTheme">Edit</string>
+    <string name="themesAddTheme">Add theme</string>
+    <string name="isUpdatingThemeText">Updating</string>
+
+    <string name="editThemeNameTV">Theme name</string>
+    <string name="editThemeRandomTV">Random music queue</string>
+    <string name="editThemeLoopTV">Loop music</string>
+    <string name="editThemeTracksListTV">Tracks</string>
+    <string name="editThemeDeleteThemeText">Delete theme</string>
+    <string name="editThemeAddTrackIVText">Add track</string>
+    <string name="editThemeDeleteThemeDialogOK">OK</string>
+    <string name="editThemeDeleteThemeDialogYes">Yes</string>
+    <string name="editThemeDeleteThemeDialogNo">No</string>
+
+    <string name="addTrackToThemeSearchIconDescription">Search</string>
+    <string name="addTrackToThemeMenuSelectAll">Select all visible</string>
+    <string name="addTrackToThemeMenuUnselectAll">Unselect all visible</string>
+
+    <string name="themesFragmentUpdateTracksButton">Update music tracks</string>
+    <string name="themesFragmentUpdateImageDescription">Update icon</string>
+    <string name="themesFragmentUpdateTracksProgressText">Updating</string>
+    <string name="themesFragmentThemesCount">Current number of music tracks: </string>
+    <string name="themesFragmentThemesBaseNumber">Not loaded</string>
+</resources>

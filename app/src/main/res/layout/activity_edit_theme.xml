@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditTheme">
+
+    <TextView
+        android:id="@+id/themeNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/editThemeNameTV"
+        android:textAppearance="@style/EditThemeElementtitle"
+        app:layout_constraintBottom_toBottomOf="@+id/themeNameMT"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/themeNameMT"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:textColor="@color/colorPrimaryDark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/themeNameTV"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/loopMusicTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/editThemeLoopTV"
+        android:textAppearance="@style/EditThemeElementtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/loopSwitch" />
+
+    <TextView
+        android:id="@+id/loopMusicTV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/editThemeRandomTV"
+        android:textAppearance="@style/EditThemeElementtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/randomSwitch" />
+
+    <Switch
+        android:id="@+id/loopSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:checked="false"
+        app:layout_constraintStart_toEndOf="@+id/loopMusicTV"
+        app:layout_constraintTop_toBottomOf="@+id/themeNameTV"
+        tools:checked="false" />
+
+    <Switch
+        android:id="@+id/randomSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toEndOf="@+id/loopMusicTV2"
+        app:layout_constraintTop_toBottomOf="@+id/loopMusicTV" />
+
+    <TextView
+        android:id="@+id/loopMusicTV3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/editThemeTracksListTV"
+        android:textAppearance="@style/EditThemeElementtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loopMusicTV2" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tracksRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loopMusicTV3"
+        tools:listitem="@layout/track_card" />
+
+    <ImageView
+        android:id="@+id/addTrackIV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/editThemeAddTrackIVText"
+        app:layout_constraintBottom_toBottomOf="@+id/loopMusicTV3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/loopMusicTV3"
+        app:srcCompat="@drawable/ic_add_circle_black_24dp"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/isUpdatingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/isUpdatingThemeText"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/tracksRecyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
