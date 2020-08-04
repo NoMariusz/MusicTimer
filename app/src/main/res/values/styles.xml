@@ -24,8 +24,15 @@
     </style>
 
     <style name="TimerButtonsTheme" parent="@style/Widget.AppCompat.Button.Borderless.Colored">
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:background">@drawable/rounded_button_shape</item>
+        <item name="android:padding">2sp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="TimerAllScreenButtonText" parent="@style/Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">40sp</item>
         <item name="android:padding">4sp</item>
     </style>
 

@@ -31,9 +31,8 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(mytag, "onViewCreated - start")
 
-        val leftBtn: Button? = getView()?.findViewById(R.id.leftBtn)
         val rightBtn: Button? = getView()?.findViewById(R.id.rightBtn)
-        leftBtn?.setOnClickListener{_ -> startTimer()}
+        view.setOnClickListener{startTimer()}
         rightBtn?.setOnClickListener{_ -> resetTimer()}
     }
 
@@ -60,7 +59,7 @@ class HomeFragment : Fragment() {
     // btn operations
 
     private fun startTimer() {
-        Log.d(mytag, "startTimer - start")
+        Log.d(mytag, "startTimer()")
         MusicPlayer.loadMusic()
         MainTimer.startMainTimer()
         modifyUiAtStart()
@@ -70,6 +69,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun stopTimer() {
+        Log.d(mytag, "stopTimer()")
         MainTimer.pauseTimer()
         modifyUiAtStop()
         MusicPlayer.pauseMusic()
@@ -77,6 +77,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun resetTimer() {
+        Log.d(mytag, "resetTimer()")
         MainTimer.pauseTimer()
 
         MainTimer.resetTime()
@@ -88,6 +89,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun resumeTimer() {
+        Log.d(mytag, "resumeTimer()")
         MainTimer.startMainTimer(resetTime = false)
         modifyUiAtResume()
         MusicPlayer.playMusic()
@@ -102,7 +104,7 @@ class HomeFragment : Fragment() {
         rightBtn?.visibility = Button.VISIBLE
         leftBtn?.setText(R.string.timerStop)
 
-        leftBtn?.setOnClickListener {
+        view?.setOnClickListener {
             stopTimer()
         }
     }
@@ -113,7 +115,7 @@ class HomeFragment : Fragment() {
 
         rightBtn?.visibility = Button.VISIBLE
         leftBtn?.setText(R.string.timerResume)
-        leftBtn?.setOnClickListener {
+        view?.setOnClickListener {
             resumeTimer()
         }
     }
@@ -122,7 +124,7 @@ class HomeFragment : Fragment() {
         val leftBtn: Button? = view?.findViewById(R.id.leftBtn)
 
         leftBtn?.setText(R.string.timerStop)
-        leftBtn?.setOnClickListener {
+        view?.setOnClickListener {
             stopTimer()
         }
     }
@@ -132,10 +134,10 @@ class HomeFragment : Fragment() {
         val rightBtn: Button? = view?.findViewById(R.id.rightBtn)
 
         leftBtn?.setText(R.string.timerStart)
-        leftBtn?.setOnClickListener {
+        view?.setOnClickListener {
             startTimer()
         }
-        rightBtn?.visibility = Button.GONE
+        rightBtn?.visibility = Button.INVISIBLE
     }
 
 }

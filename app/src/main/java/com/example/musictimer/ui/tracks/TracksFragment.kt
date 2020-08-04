@@ -130,7 +130,7 @@ class TracksFragment : Fragment() {
 
                 // Stores column values and the contentUri in a local object
                 // that represents the media file.
-                audioList += Track(0, name, contentUri.toString())
+                audioList.add(Track(0, name, contentUri.toString()))
             }
         }
         Log.d(mytag, "get videos length ${audioList.size}")
