@@ -1,13 +1,21 @@
 # MusicTimer
+![MusicTimer logo](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png "MusicTimer logo")
+
 Simple Android app, which is mix of stopwatch and music player !
 
-To start stopwatch simply press "start" after app launch, but nothing playing yet.
-To play music:
-* you must go to "tracks" section in navigation drawer
-* press "Update music tracks"
-* next go to "Themes" section in navigation drawer
-* add new theme
-* add tracks to it
-* go back to themes list
-* and set active that new theme
-Then when you start stopwatch, music plays :)
+## Work
+* simply press start to start timer
+* if you want to load your music to app go to "Tracks", then press "Update music tracks"
+* add new theme in "Themes", add tracks to it, and set that theme active
+Now when you start stopwatch, music plays :)
+
+## Main informations
+App operate at minimum SDK 23, that is Android 6.0
+
+MusicTimer mainly uses modules such a Room Persistence Library, and Coroutines
+
+Works at this project started about half of may 2020
+
+## TODO
+* automatic loading device music
+* displaying current song informations
