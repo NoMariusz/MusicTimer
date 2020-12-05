@@ -4,17 +4,18 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.*
+import com.example.musictimer.ACTUAL_PLAYING_TRACK_NAME_BLANK
 import com.example.musictimer.data.MusicViewModel
+import com.example.musictimer.data.Track
 import kotlin.random.Random
 
 object MusicPlayer {
     private var parrentContext: Context? = null
     private const val mytag = "MusicPlayer"
     private var mediaPlayer: MediaPlayer? = null
-    private var playList: Array<String>? = null
+    private var playList: Array<Track>? = null
+    var actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
 
     private lateinit var musicViewModel: MusicViewModel
 
@@ -45,7 +46,9 @@ object MusicPlayer {
             val track = playList?.get(0)
             if (track != null) {
                 mediaPlayer = MediaPlayer.create(
-                    parrentContext, Uri.parse(track))
+                    parrentContext, Uri.parse(track.value))
+                Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
+                actualTrackName.postValue(track.name)
             }
         } else {
             mediaPlayer = null
@@ -71,6 +74,7 @@ object MusicPlayer {
         Log.d(mytag, "disableMusic - start")
         mediaPlayer?.release()
         mediaPlayer = null
+        actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
     }
 
     private fun trackEnd(){
@@ -102,13 +106,13 @@ object MusicPlayer {
     private fun makeActualPlaylist(){
         Log.d(mytag, "makeActualPlaylist")
         val selectedTheme = musicViewModel.getSelectedTheme()
-        playList = musicViewModel.getSelectedThemeTracksValues().toTypedArray()
+        playList = musicViewModel.getSelectedThemeTracks().toTypedArray()
         if (selectedTheme.random) {
             myShuffle(playList)
         }
     }
 
-    private fun myShuffle(workArray: Array<String>?){
+    private fun myShuffle(workArray: Array<Track>?){
         if (workArray != null){
             // Fisher-Yates shuffle algorithm
             for (i in workArray.size - 1 downTo 1) {

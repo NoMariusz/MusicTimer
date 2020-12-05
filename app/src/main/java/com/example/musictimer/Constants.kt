@@ -11,4 +11,7 @@ const val SELECTED_THEME_INFORMATION_ENTITY_ID: Long = 1
 
 const val ADD_TRACK_TO_THEME_REQUEST_CODE = 223
 const val ADD_TRACK_TO_THEME_NEW_TRACKS_ID_ARRAY = "array_with_id_to_editing_themes"
-const val ADD_TRACK_TO_THEME_SAVING_INTENT_TRACKS_IDS = "ids_of_tracks_to_save_add_tracks_to_theme_selected_tracks"
+const val ADD_TRACK_TO_THEME_SAVING_INTENT_TRACKS_IDS =
+    "ids_of_tracks_to_save_add_tracks_to_theme_selected_tracks"
+
+const val ACTUAL_PLAYING_TRACK_NAME_BLANK = "actual_playing_track_is_null_so_not_playing_any_track"

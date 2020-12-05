@@ -12,10 +12,10 @@
         android:layout_height="wrap_content"
         android:text="@string/timerStartTime"
         android:textAppearance="@style/TimeDisplayTheme"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/leftBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MusicManageLayout"
         app:layout_constraintVertical_bias="0.5"
         tools:text="@string/timerStartTime" />
 
@@ -41,5 +41,43 @@
         app:layout_constraintBottom_toTopOf="@+id/rightBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/MusicManageLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/actualTrackNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/noneTrackNameLoaded"
+            android:textAppearance="@style/EditThemeElementtitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/showMusicManageIV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/showMusicManageIVDescription"
+        android:src="@drawable/ic_baseline_keyboard_arrow_down_48"
+        app:layout_constraintEnd_toEndOf="@+id/MusicManageLayout"
+        app:layout_constraintStart_toStartOf="@+id/MusicManageLayout"
+        app:layout_constraintTop_toBottomOf="@+id/MusicManageLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

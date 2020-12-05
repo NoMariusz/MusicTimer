@@ -1,6 +1,5 @@
 package com.example.musictimer.mechanisms
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -20,6 +19,7 @@ object MainTimer {
     private var seconds: Long = 0
     private var minutes: Long = 0
     private var startTime: Long = 0
+    private var stopTime: Long = 0
     private const val millisecondsPrecision = 100  // how precise is timer tick
     private var mainTimer = Timer()
     var timerStatus = TIMER_NOT_STARTED
@@ -31,10 +31,14 @@ object MainTimer {
 
     fun startMainTimer(resetTime: Boolean = true) {
         Log.d(mytag, "startMainTimer - start")
-        startTime = Calendar.getInstance().time.time
         if (resetTime) {
+            startTime = Calendar.getInstance().time.time
             resetTime()
+        } else {    // if not reset time at startTimer it is resume
+            val stoppedTime = Calendar.getInstance().time.time - stopTime
+            startTime += stoppedTime    // start time is modified by stop time, to correct work
         }
+        stopTime = 0
         mainTimer.schedule(0, millisecondsPrecision.toLong()) {
             timerClick()
         }
@@ -58,6 +62,7 @@ object MainTimer {
         mainTimer = Timer()
         timerStatus =
             TIMER_STOPPED
+        stopTime = Calendar.getInstance().time.time
     }
 
     fun loadTimeToUi() {

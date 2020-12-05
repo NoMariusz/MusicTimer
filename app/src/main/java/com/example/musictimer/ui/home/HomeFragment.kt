@@ -1,13 +1,15 @@
 package com.example.musictimer.ui.home
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import com.example.musictimer.*
 import com.example.musictimer.TIMER_RUNNING
 import com.example.musictimer.TIMER_STOPPED
@@ -17,6 +19,7 @@ import com.example.musictimer.mechanisms.MusicPlayer
 class HomeFragment : Fragment() {
 
     private val mytag = "HomeFragment"
+    private var musicManageVisible = false
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -31,9 +34,11 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(mytag, "onViewCreated - start")
 
-        val rightBtn: Button? = getView()?.findViewById(R.id.rightBtn)
+        val rightBtn: Button? = view.findViewById(R.id.rightBtn)
+        val showMusicManagerIV: ImageView? = view.findViewById(R.id.showMusicManageIV)
         view.setOnClickListener{startTimer()}
-        rightBtn?.setOnClickListener{_ -> resetTimer()}
+        rightBtn?.setOnClickListener{ resetTimer()}
+        showMusicManagerIV?.setOnClickListener { displayMusicManageBlock() }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -43,6 +48,17 @@ class HomeFragment : Fragment() {
         MainTimer.parrent = this
         MainTimer.loadTimeToUi()
         loadTimerStatus()
+
+        val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
+        MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
+            data?.let {
+                if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK){
+                    actualTrackTV?.text = resources.getString(R.string.noneTrackNameLoaded)
+                } else {
+                    actualTrackTV?.text = it
+                }
+            }
+        })
     }
 
     private fun loadTimerStatus() {
@@ -54,6 +70,18 @@ class HomeFragment : Fragment() {
         if (MainTimer.timerStatus == TIMER_STOPPED) {
             modifyUiAtStop()
         }
+    }
+
+    private fun displayMusicManageBlock(){
+        val musicManageLay: ConstraintLayout? = view?.findViewById(R.id.MusicManageLayout)
+        val showMusicManagerIV: ImageView? = view?.findViewById(R.id.showMusicManageIV)
+        if (musicManageVisible){
+            musicManageLay?.visibility = View.GONE
+        } else {
+            musicManageLay?.visibility = View.VISIBLE
+        }
+        showMusicManagerIV?.rotation = 180F + showMusicManagerIV?.rotation!!
+        musicManageVisible = !musicManageVisible
     }
 
     // btn operations

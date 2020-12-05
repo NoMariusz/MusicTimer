@@ -46,9 +46,9 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
 
     private fun getTrackById(trackId: Long): Track {
         // do not invoke when allTracks are not updated form base
-        for (ltrack in allTracks.value!!){
-            if (trackId == ltrack.trackId){
-                return ltrack
+        for (track in allTracks.value!!){
+            if (trackId == track.trackId){
+                return track
             }
         }
         throw Exception("MusicVieModel - getTrackById() - can't find trackId $trackId in database")
@@ -70,20 +70,20 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         return selectedThemeTracks
     }
 
-    private fun getSelectedThemeTracks(): List<Track> {
+    fun getSelectedThemeTracks(): List<Track> {
         val selectedTheme = getSelectedTheme()
         return getThemeTracks(selectedTheme)
     }
 
-    fun getSelectedThemeTracksValues(): List<String> {
-        val values = mutableListOf<String>()
-        val selectedThemeTracks = getSelectedThemeTracks()
-
-        for (va in selectedThemeTracks){
-            values.add(va.value)
-        }
-        return values
-    }
+//    fun getSelectedThemeTracksValues(): List<String> {
+//        val values = mutableListOf<String>()
+//        val selectedThemeTracks = getSelectedThemeTracks()
+//
+//        for (va in selectedThemeTracks){
+//            values.add(va.value)
+//        }
+//        return values
+//    }
 
     private fun getMainInfoEntity(): InformationEntity {
         // do not invoke when selectedThemeInformationEntities are not updated form base

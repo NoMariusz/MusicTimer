@@ -45,4 +45,7 @@
     <string name="themesFragmentUpdateTracksProgressText">Updating</string>
     <string name="themesFragmentThemesCount">Current number of music tracks: </string>
     <string name="themesFragmentThemesBaseNumber">Not loaded</string>
+
+    <string name="showMusicManageIVDescription">Show music manage layout</string>
+    <string name="noneTrackNameLoaded">Not playing music</string>
 </resources>
