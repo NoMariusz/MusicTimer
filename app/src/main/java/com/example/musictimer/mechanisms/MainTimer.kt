@@ -10,14 +10,16 @@ import com.example.musictimer.TIMER_RUNNING
 import com.example.musictimer.TIMER_STOPPED
 import java.util.*
 import kotlin.concurrent.schedule
+import java.util.concurrent.TimeUnit
+import java.util.Calendar
 
 object MainTimer {
     var parrent: Fragment? = null
     private const val mytag = "MainTimer"
 
-    private var seconds = 0
-    private var minutes = 0
-    private var miliseconds = 0
+    private var seconds: Long = 0
+    private var minutes: Long = 0
+    private var startTime: Long = 0
     private const val millisecondsPrecision = 100  // how precise is timer tick
     private var mainTimer = Timer()
     var timerStatus = TIMER_NOT_STARTED
@@ -29,6 +31,7 @@ object MainTimer {
 
     fun startMainTimer(resetTime: Boolean = true) {
         Log.d(mytag, "startMainTimer - start")
+        startTime = Calendar.getInstance().time.time
         if (resetTime) {
             resetTime()
         }
@@ -40,16 +43,11 @@ object MainTimer {
     }
 
     private fun timerClick() {
-        miliseconds += millisecondsPrecision
+        val workingTime: Long = Calendar.getInstance().time.time - startTime
 
-        if (miliseconds >= 1000) {
-            miliseconds = 0
-            seconds++
-        }
-        if (seconds >= 60){
-            seconds = 0
-            minutes++
-        }
+        minutes = TimeUnit.MILLISECONDS.toMinutes(workingTime)
+        seconds = TimeUnit.MILLISECONDS.toSeconds(workingTime) - TimeUnit.MINUTES.toSeconds(minutes)
+
         parrent?.activity?.runOnUiThread {
             loadTimeToUi()
         }
@@ -73,7 +71,6 @@ object MainTimer {
     }
 
     fun resetTime() {
-        miliseconds = 0
         seconds = 0
         minutes = 0
         timerStatus =
