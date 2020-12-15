@@ -48,4 +48,7 @@
 
     <string name="showMusicManageIVDescription">Show music manage layout</string>
     <string name="noneTrackNameLoaded">Not playing music</string>
+    <string name="nextTrackIVDescription">Play next track</string>
+    <string name="previousTrackIVDescription">Play previous track</string>
+    <string name="startStopTrackIVDescription">Start or stop playing track</string>
 </resources>

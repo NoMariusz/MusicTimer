@@ -1,9 +1,10 @@
 package com.example.musictimer.ui.home
 
-import android.opengl.Visibility
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,6 +16,8 @@ import com.example.musictimer.TIMER_RUNNING
 import com.example.musictimer.TIMER_STOPPED
 import com.example.musictimer.mechanisms.MainTimer
 import com.example.musictimer.mechanisms.MusicPlayer
+import java.util.*
+import kotlin.concurrent.schedule
 
 class HomeFragment : Fragment() {
 
@@ -38,7 +41,18 @@ class HomeFragment : Fragment() {
         val showMusicManagerIV: ImageView? = view.findViewById(R.id.showMusicManageIV)
         view.setOnClickListener{startTimer()}
         rightBtn?.setOnClickListener{ resetTimer()}
-        showMusicManagerIV?.setOnClickListener { displayMusicManageBlock() }
+        showMusicManagerIV?.setOnClickListener { changeVisibilityMusicManageBlock() }
+
+        // music manage operations
+        val startStopTrackIV: ImageView? = view.findViewById(R.id.startStopTrackIV)
+        startStopTrackIV?.setOnClickListener { startMusicClick() }
+        val nextTrackIV: ImageView? = view.findViewById(R.id.nextTrackIV)
+        nextTrackIV?.setOnClickListener { nextTrack() }
+        val previousTrackIV: ImageView? = view.findViewById(R.id.previousTrackIV)
+        previousTrackIV?.setOnClickListener { previousTrack() }
+        // adding blank listener in lay to prevent view click events on this block
+        val musicManageLayout: ConstraintLayout? = view.findViewById(R.id.MusicManageLayout)
+        musicManageLayout?.setOnClickListener { }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -54,6 +68,7 @@ class HomeFragment : Fragment() {
             data?.let {
                 if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK){
                     actualTrackTV?.text = resources.getString(R.string.noneTrackNameLoaded)
+                    stopMusic()
                 } else {
                     actualTrackTV?.text = it
                 }
@@ -65,14 +80,16 @@ class HomeFragment : Fragment() {
         Log.d(mytag, "loadTimerStatus - status ${MainTimer.timerStatus}")
         if (MainTimer.timerStatus == TIMER_RUNNING) {
             modifyUiAtStart()
+            modifyUiAtStartMusic()
             activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         if (MainTimer.timerStatus == TIMER_STOPPED) {
+            modifyUiAtStopMusic()
             modifyUiAtStop()
         }
     }
 
-    private fun displayMusicManageBlock(){
+    private fun changeVisibilityMusicManageBlock(){
         val musicManageLay: ConstraintLayout? = view?.findViewById(R.id.MusicManageLayout)
         val showMusicManagerIV: ImageView? = view?.findViewById(R.id.showMusicManageIV)
         if (musicManageVisible){
@@ -84,14 +101,15 @@ class HomeFragment : Fragment() {
         musicManageVisible = !musicManageVisible
     }
 
-    // btn operations
+    // btn and iv events
 
+    // music and timer
     private fun startTimer() {
         Log.d(mytag, "startTimer()")
         MusicPlayer.loadMusic()
         MainTimer.startMainTimer()
         modifyUiAtStart()
-        MusicPlayer.playMusic()
+        startMusicClick()
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
     }
@@ -100,7 +118,7 @@ class HomeFragment : Fragment() {
         Log.d(mytag, "stopTimer()")
         MainTimer.pauseTimer()
         modifyUiAtStop()
-        MusicPlayer.pauseMusic()
+        stopMusicClick()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
@@ -112,6 +130,7 @@ class HomeFragment : Fragment() {
         MainTimer.loadTimeToUi()
 
         modifyUiAtReset()
+        stopMusic()
         MusicPlayer.disableMusic()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
@@ -120,10 +139,82 @@ class HomeFragment : Fragment() {
         Log.d(mytag, "resumeTimer()")
         MainTimer.startMainTimer(resetTime = false)
         modifyUiAtResume()
+        startMusicClick()
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    // only music, modify music manage ui
+    private inline fun onlyAtTimerRunningDec(strict: Boolean = false, func: () -> Unit){
+        if (MainTimer.timerStatus != TIMER_NOT_STARTED && !(strict && !MusicPlayer.isPlaying())) {
+            func()
+        } else {
+            playMusicManageLayLockedAnimation()
+        }
+    }
+
+    private fun playMusicManageLayLockedAnimation(){
+        val animationDuration: Long = 150
+        val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
+
+        fun animateShake(valStart: Float, valEnd: Float){
+            val valueAnimator = ValueAnimator.ofFloat(valStart, valEnd)
+
+            valueAnimator.addUpdateListener {
+                val value = it.animatedValue as Float
+                actualTrackTV?.rotation = value
+            }
+
+            valueAnimator.interpolator = AnticipateOvershootInterpolator()
+            valueAnimator.duration = animationDuration
+            valueAnimator.start()
+        }
+
+        animateShake(0f, 5f)
+
+        val secondAnimDelayTimer = Timer()
+        secondAnimDelayTimer.schedule(0, animationDuration) {
+            this@HomeFragment.activity?.runOnUiThread {
+                animateShake(5f, 0f)
+                secondAnimDelayTimer.cancel()
+            }
+        }
+    }
+
+    private fun stopMusicClick() = onlyAtTimerRunningDec(true) {
+        stopMusic()
+    }
+
+    private fun stopMusic(){
+        modifyUiAtStopMusic()
+        MusicPlayer.pauseMusic()
+    }
+
+    private fun modifyUiAtStopMusic(){
+        val startStopTrackIV: ImageView? = view?.findViewById(R.id.startStopTrackIV)
+        startStopTrackIV?.setImageResource(R.drawable.ic_baseline_play_arrow_48)
+        startStopTrackIV?.setOnClickListener { startMusicClick() }
+    }
+
+    private  fun startMusicClick() = onlyAtTimerRunningDec(true) {
+        modifyUiAtStartMusic()
         MusicPlayer.playMusic()
     }
 
-    // ui modify
+    private fun modifyUiAtStartMusic(){
+        val startStopTrackIV: ImageView? = view?.findViewById(R.id.startStopTrackIV)
+        startStopTrackIV?.setImageResource(R.drawable.ic_baseline_pause_48)
+        startStopTrackIV?.setOnClickListener { stopMusicClick() }
+    }
+
+    private fun nextTrack() = onlyAtTimerRunningDec {
+        MusicPlayer.nextSong()
+    }
+
+    private fun previousTrack() = onlyAtTimerRunningDec {
+        MusicPlayer.previousSong()
+    }
+
+    // main ui modify
 
     private fun modifyUiAtStart(){
         val leftBtn: Button? = view?.findViewById(R.id.leftBtn)

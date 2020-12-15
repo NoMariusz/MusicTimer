@@ -1,8 +1,8 @@
 package com.example.musictimer
 
-const val TIMER_NOT_STARTED = 0
-const val TIMER_RUNNING = 1
-const val TIMER_STOPPED = 2
+const val TIMER_NOT_STARTED = 303
+const val TIMER_RUNNING = 103
+const val TIMER_STOPPED = 203
 
 const val SELECTED_THEME_ID = "selected_theme_position_on_editing_theme"
 const val SELECTED_THEME_ID_NOT_SET: Long = -123

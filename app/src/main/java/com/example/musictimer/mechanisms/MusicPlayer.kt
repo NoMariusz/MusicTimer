@@ -6,15 +6,21 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.musictimer.ACTUAL_PLAYING_TRACK_NAME_BLANK
+import com.example.musictimer.data.MusicTheme
 import com.example.musictimer.data.MusicViewModel
 import com.example.musictimer.data.Track
 import kotlin.random.Random
 
 object MusicPlayer {
-    private var parrentContext: Context? = null
+    private var parentContext: Context? = null
     private const val mytag = "MusicPlayer"
     private var mediaPlayer: MediaPlayer? = null
     private var playList: Array<Track>? = null
+    private var playlistTrackIndex: Int = 0
+    var selectedTheme: MusicTheme? = null
+    enum class IndexOperations {
+        INCREASE, DECREASE
+    }
     var actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
 
     private lateinit var musicViewModel: MusicViewModel
@@ -24,7 +30,7 @@ object MusicPlayer {
     }
 
     fun preparePlayer(context: Context, viewModelStoreOwner: ViewModelStoreOwner, lifecycleOwner: LifecycleOwner){
-        parrentContext = context
+        parentContext = context
         musicViewModel = ViewModelProvider(viewModelStoreOwner).get(MusicViewModel::class.java)
         musicViewModel.setNeededBlankDataObservers(lifecycleOwner, listOf(
             musicViewModel.selectedThemeInformationEntities, musicViewModel.allThemes,
@@ -33,6 +39,8 @@ object MusicPlayer {
 
     fun loadMusic() {
         Log.d(mytag, "loadMusic - start")
+        playlistTrackIndex = 0
+        selectedTheme = musicViewModel.getSelectedTheme()
         makeActualPlaylist()
         loadNewTrack()
     }
@@ -43,10 +51,10 @@ object MusicPlayer {
         mediaPlayer = MediaPlayer()
 
         if (playList?.size != 0){
-            val track = playList?.get(0)
+            val track = playList?.get(playlistTrackIndex)
             if (track != null) {
                 mediaPlayer = MediaPlayer.create(
-                    parrentContext, Uri.parse(track.value))
+                    parentContext, Uri.parse(track.value))
                 Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
                 actualTrackName.postValue(track.name)
             }
@@ -56,58 +64,71 @@ object MusicPlayer {
         }
 
         mediaPlayer?.setOnCompletionListener {
-            trackEnd()
+            goToNewTrack(IndexOperations.INCREASE, true)
         }
     }
 
-    fun playMusic() {
-        Log.d(mytag, "playMusic - start")
-        mediaPlayer?.start()
-    }
+    private fun goToNewTrack(operation: IndexOperations, forcePlay: Boolean = false){
+        val canPlay = changeTrackIndex(operation)
 
-    fun pauseMusic() {
-        Log.d(mytag, "pauseMusic - start")
-        mediaPlayer?.pause()
-    }
-
-    fun disableMusic() {
-        Log.d(mytag, "disableMusic - start")
-        mediaPlayer?.release()
-        mediaPlayer = null
-        actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
-    }
-
-    private fun trackEnd(){
-        Log.d(mytag, "trackEnd - start")
-        Log.d(mytag, "before drop ${playList?.size}")
-        playList = playList?.drop(1)?.toTypedArray()
-        Log.d(mytag, "after drop ${playList?.size}")
-
-        checkPlaylistLoop()
-
-        loadNewTrack()
-
-        if (playList?.size != 0){
-            playMusic()
+        if (canPlay){
+            val mediaPlayerWasPlaying: Boolean = mediaPlayer?.isPlaying == true
+            loadNewTrack()
+            if (mediaPlayerWasPlaying || forcePlay){
+                playMusic()
+            }
+        } else {
+            mediaPlayer?.release()
+            mediaPlayer = null
+            actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
         }
     }
 
-    private fun checkPlaylistLoop() {
-        Log.d(mytag, "checkPlaylistLoop")
-        val selectedTheme =
-            musicViewModel.getSelectedTheme()
-        if (selectedTheme.loop){
-            if (playList?.size == 0){
-                makeActualPlaylist()
+    private fun changeTrackIndex(operation: IndexOperations): Boolean {
+        Log.d(mytag, "changeTrackIndex - start, index $playlistTrackIndex, " +
+                "operation: $operation")
+        if (playList === null){
+            return false
+        }
+
+        val outOfRangeAtStart: Boolean = playList?.size!! <= playlistTrackIndex  ||
+                playlistTrackIndex < 0
+
+        if (operation == IndexOperations.INCREASE){
+            playlistTrackIndex ++
+        } else {
+            playlistTrackIndex --
+        }
+
+        if (selectedTheme?.loop == true){
+            if (playList?.size == playlistTrackIndex){
+                playlistTrackIndex = 0
+            } else if (playlistTrackIndex < 0){
+                playlistTrackIndex = playList?.size?.minus(1) ?: 0
+            }
+        } else {
+            if (playList?.size!! <= playlistTrackIndex  || playlistTrackIndex < 0){
+                // if before and after operation is out of range, then change value to before state
+                if (outOfRangeAtStart){
+                    if (operation == IndexOperations.INCREASE){
+                        playlistTrackIndex --
+                    } else {
+                        playlistTrackIndex ++
+                    }
+                }
+                return false
             }
         }
+        return true
     }
 
     private fun makeActualPlaylist(){
         Log.d(mytag, "makeActualPlaylist")
-        val selectedTheme = musicViewModel.getSelectedTheme()
         playList = musicViewModel.getSelectedThemeTracks().toTypedArray()
-        if (selectedTheme.random) {
+        if (playList?.size == 0){
+            playList = null
+        }
+        if (selectedTheme?.random == true) {
             myShuffle(playList)
         }
     }
@@ -122,6 +143,39 @@ object MusicPlayer {
                 workArray[j] = temp
             }
         }
+    }
+
+    fun playMusic() {
+        Log.d(mytag, "playMusic - start")
+        mediaPlayer?.start()
+    }
+
+    fun pauseMusic() {
+        Log.d(mytag, "pauseMusic - start")
+        if (mediaPlayer?.isPlaying == true){  // to prevent from error, when pause not started track
+            mediaPlayer?.pause()
+        }
+    }
+
+    fun disableMusic() {
+        Log.d(mytag, "disableMusic - start")
+        mediaPlayer?.release()
+        mediaPlayer = null
+        actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
+    }
+
+    fun nextSong() {
+        Log.d(mytag, "nextSong - start")
+        goToNewTrack(IndexOperations.INCREASE)
+    }
+
+    fun previousSong() {
+        Log.d(mytag, "previousSong - start")
+        goToNewTrack(IndexOperations.DECREASE)
+    }
+
+    fun isPlaying(): Boolean{
+        return mediaPlayer != null
     }
 
 }

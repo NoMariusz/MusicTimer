@@ -56,18 +56,56 @@
 
         <TextView
             android:id="@+id/actualTrackNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/noneTrackNameLoaded"
+            android:textAlignment="center"
+            android:textAppearance="@style/CardTitleTheme"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/nextTrackIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/nextTrackIVDescription"
+            android:src="@drawable/ic_baseline_skip_next_48"
+            android:tint="@color/colorPrimary"
+            app:layout_constraintStart_toEndOf="@+id/startStopTrackIV"
+            app:layout_constraintTop_toTopOf="@+id/startStopTrackIV" />
+
+        <ImageView
+            android:id="@+id/previousTrackIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/noneTrackNameLoaded"
+            android:src="@drawable/ic_baseline_skip_previous_48"
+            android:tint="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/startStopTrackIV"
+            app:layout_constraintTop_toBottomOf="@+id/actualTrackNameText" />
+
+        <ImageView
+            android:id="@+id/startStopTrackIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:text="@string/noneTrackNameLoaded"
-            android:textAppearance="@style/EditThemeElementtitle"
+            android:contentDescription="@string/startStopTrackIVDescription"
+            android:src="@drawable/ic_baseline_play_arrow_48"
+            android:tint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/actualTrackNameText" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
