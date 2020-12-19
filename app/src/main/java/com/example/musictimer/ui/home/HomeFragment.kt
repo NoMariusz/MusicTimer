@@ -1,23 +1,23 @@
 package com.example.musictimer.ui.home
 
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.*
 import android.view.animation.AnticipateOvershootInterpolator
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.example.musictimer.*
-import com.example.musictimer.TIMER_RUNNING
-import com.example.musictimer.TIMER_STOPPED
 import com.example.musictimer.mechanisms.MainTimer
 import com.example.musictimer.mechanisms.MusicPlayer
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.concurrent.schedule
+
 
 class HomeFragment : Fragment() {
 
@@ -25,9 +25,9 @@ class HomeFragment : Fragment() {
     private var musicManageVisible = false
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         Log.d(mytag, "onCreateView")
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -64,14 +64,48 @@ class HomeFragment : Fragment() {
         loadTimerStatus()
 
         val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
+
+        // text translation
+        val trackNameScrollView: HorizontalScrollView? = view?.findViewById(R.id.trackNameScrollView)
+        actualTrackTV?.movementMethod = ScrollingMovementMethod()   // to scroll
+        actualTrackTV?.setHorizontallyScrolling(true)
+        val animTime = 5000L
+        GlobalScope.launch(Dispatchers.Main){
+            while (true) {
+                val scrollWith = actualTrackTV?.width?.minus((actualTrackTV.parent?.parent as View).width) ?: 0
+                Log.d(mytag, "onActivityCreated - text transition animation start " +
+                        "scrollWith $scrollWith")
+                try {
+                    activity?.runOnUiThread {
+                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", scrollWith).apply {
+                            duration = animTime
+                            start()
+                        }
+                    }
+                    delay(animTime + 100L)
+                    activity?.runOnUiThread {
+                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", 0).apply {
+                            duration = animTime
+                            start()
+                        }
+                    }
+                    delay(animTime + 100L)
+                } catch (e: Exception){
+                    Log.e(mytag, "onActivityCreated: slidingTitleJob: ", e)
+                }
+            }
+        }
+
         MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
             data?.let {
-                if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK){
+                Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
+                if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
                     actualTrackTV?.text = resources.getString(R.string.noneTrackNameLoaded)
                     stopMusic()
                 } else {
                     actualTrackTV?.text = it
                 }
+                // TODO: find way to restart slidingTitleJob at change track name
             }
         })
     }

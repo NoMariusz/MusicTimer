@@ -8,7 +8,7 @@ import com.example.musictimer.R
 
 class TracksOnEditThemeTouchHelper(tracksAdapter: TracksOnEditThemeTouchHelperAdapter) : ItemTouchHelper.Callback() {
 
-    var tracksTouchAdapter: TracksOnEditThemeTouchHelperAdapter = tracksAdapter
+    private var tracksTouchAdapter: TracksOnEditThemeTouchHelperAdapter = tracksAdapter
 
     override fun getMovementFlags(
         recyclerView: RecyclerView,

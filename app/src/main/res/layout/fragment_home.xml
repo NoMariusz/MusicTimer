@@ -54,20 +54,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/actualTrackNameText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+        <com.example.musictimer.ui.BlockedToUsersScrollingView
+            android:id="@+id/trackNameScrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:text="@string/noneTrackNameLoaded"
-            android:textAlignment="center"
-            android:textAppearance="@style/CardTitleTheme"
-            android:textColor="@color/colorAccent"
+            android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/actualTrackNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:singleLine="false"
+                    android:text="@string/noneTrackNameLoaded"
+                    android:textAppearance="@style/CardTitleTheme"
+                    android:textColor="@color/colorAccent" />
+            </LinearLayout>
+        </com.example.musictimer.ui.BlockedToUsersScrollingView>
 
         <ImageView
             android:id="@+id/nextTrackIV"
@@ -86,25 +102,23 @@
             android:contentDescription="@string/noneTrackNameLoaded"
             android:src="@drawable/ic_baseline_skip_previous_48"
             android:tint="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/startStopTrackIV"
-            app:layout_constraintTop_toBottomOf="@+id/actualTrackNameText" />
+            app:layout_constraintTop_toTopOf="@+id/startStopTrackIV" />
 
         <ImageView
             android:id="@+id/startStopTrackIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
             android:contentDescription="@string/startStopTrackIVDescription"
             android:src="@drawable/ic_baseline_play_arrow_48"
             android:tint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/actualTrackNameText" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
