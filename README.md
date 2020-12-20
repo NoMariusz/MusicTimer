@@ -18,4 +18,3 @@ Works at this project started about half of may 2020
 
 ## TODO
 * automatic loading device music
-* displaying current song informations

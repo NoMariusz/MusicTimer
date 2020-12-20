@@ -20,9 +20,9 @@ import kotlin.concurrent.schedule
 
 
 class HomeFragment : Fragment() {
-
     private val mytag = "HomeFragment"
     private var musicManageVisible = false
+    private var slidingNameJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,48 +64,17 @@ class HomeFragment : Fragment() {
         loadTimerStatus()
 
         val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
-
-        // text translation
-        val trackNameScrollView: HorizontalScrollView? = view?.findViewById(R.id.trackNameScrollView)
-        actualTrackTV?.movementMethod = ScrollingMovementMethod()   // to scroll
-        actualTrackTV?.setHorizontallyScrolling(true)
-        val animTime = 5000L
-        GlobalScope.launch(Dispatchers.Main){
-            while (true) {
-                val scrollWith = actualTrackTV?.width?.minus((actualTrackTV.parent?.parent as View).width) ?: 0
-                Log.d(mytag, "onActivityCreated - text transition animation start " +
-                        "scrollWith $scrollWith")
-                try {
-                    activity?.runOnUiThread {
-                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", scrollWith).apply {
-                            duration = animTime
-                            start()
-                        }
-                    }
-                    delay(animTime + 100L)
-                    activity?.runOnUiThread {
-                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", 0).apply {
-                            duration = animTime
-                            start()
-                        }
-                    }
-                    delay(animTime + 100L)
-                } catch (e: Exception){
-                    Log.e(mytag, "onActivityCreated: slidingTitleJob: ", e)
-                }
-            }
-        }
-
         MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
             data?.let {
                 Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
+                var newTrackName: String = it
                 if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
-                    actualTrackTV?.text = resources.getString(R.string.noneTrackNameLoaded)
+                    newTrackName = resources.getString(R.string.noneTrackNameLoaded)
                     stopMusic()
-                } else {
-                    actualTrackTV?.text = it
                 }
-                // TODO: find way to restart slidingTitleJob at change track name
+                actualTrackTV?.text = newTrackName
+                // to reload sliding at new songs
+                if (musicManageVisible) startSlidingNameJob(newTrackName)
             }
         })
     }
@@ -128,8 +97,10 @@ class HomeFragment : Fragment() {
         val showMusicManagerIV: ImageView? = view?.findViewById(R.id.showMusicManageIV)
         if (musicManageVisible){
             musicManageLay?.visibility = View.GONE
+            slidingNameJob?.cancel()
         } else {
             musicManageLay?.visibility = View.VISIBLE
+            startSlidingNameJob(null)
         }
         showMusicManagerIV?.rotation = 180F + showMusicManagerIV?.rotation!!
         musicManageVisible = !musicManageVisible
@@ -293,4 +264,42 @@ class HomeFragment : Fragment() {
         rightBtn?.visibility = Button.INVISIBLE
     }
 
+
+    private fun startSlidingNameJob(newTrackName: String?) {
+        val trackNameScrollView: HorizontalScrollView? = view?.findViewById(R.id.trackNameScrollView)
+        val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
+        val animTime: Long =
+            if (newTrackName != null) newTrackName.length * 150L
+            else (actualTrackTV?.text?.length ?: 35) * 150L
+        slidingNameJob?.cancel()
+        slidingNameJob = GlobalScope.launch(Dispatchers.Main){
+            var scrollWith: Int = (actualTrackTV?.width ?: 0) - (trackNameScrollView?.width ?: 0)
+            if (scrollWith == 0){   // to wait ui to load text view
+                delay(100L)
+                scrollWith = (actualTrackTV?.width ?: 0) - (trackNameScrollView?.width ?: 0)
+            }
+            Log.d(mytag, "startSlidingNameJob - scrollWith $scrollWith")
+            try {
+                while (true) {
+                    activity?.runOnUiThread {
+                        trackNameScrollView?.scrollX = 0
+                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", scrollWith).apply {
+                            duration = animTime
+                            start()
+                        }
+                    }
+                    delay(animTime + 100L)
+                    activity?.runOnUiThread {
+                        ObjectAnimator.ofInt(trackNameScrollView, "scrollX", 0).apply {
+                            duration = animTime
+                            start()
+                        }
+                    }
+                    delay(animTime + 100L)
+                }
+            } catch (e: Exception){
+                Log.d(mytag, "onActivityCreated: SlidingNameJob: ", e)
+            }
+        }
+    }
 }
