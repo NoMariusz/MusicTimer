@@ -12,9 +12,11 @@ Now when you start stopwatch, music plays :)
 ## Main informations
 App operate at minimum SDK 23, that is Android 6.0
 
-MusicTimer mainly uses modules such a Room Persistence Library, and Coroutines
+MusicTimer mainly uses modules such a Room Persistence Library, and Coroutines to store data
 
 Works at this project started about half of may 2020
 
 ## TODO
 * automatic loading device music
+* make something like foreground servie with music player
+* make smoth displaying MusicManageLayout
