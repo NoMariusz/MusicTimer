@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/MusicManageMotionLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layoutDescription="@xml/fragment_home_scene"
+    tools:showIn="@layout/fragment_home">
+
+    <ImageView
+        android:id="@+id/showMusicManageIV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/showMusicManageIVDescription"
+        android:src="@drawable/ic_baseline_keyboard_arrow_down_48"
+        app:layout_constraintEnd_toEndOf="@+id/MusicManageLayout"
+        app:layout_constraintStart_toStartOf="@+id/MusicManageLayout"
+        app:layout_constraintTop_toBottomOf="@+id/MusicManageLayout" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/MusicManageLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <com.example.musictimer.ui.BlockedToUsersScrollingView
+            android:id="@+id/trackNameScrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/actualTrackNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:singleLine="false"
+                    android:text="@string/noneTrackNameLoaded"
+                    android:textAppearance="@style/CardTitleTheme"
+                    android:textColor="@color/colorAccent" />
+            </LinearLayout>
+        </com.example.musictimer.ui.BlockedToUsersScrollingView>
+
+        <ImageView
+            android:id="@+id/nextTrackIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/nextTrackIVDescription"
+            android:src="@drawable/ic_baseline_skip_next_48"
+            app:layout_constraintStart_toEndOf="@+id/startStopTrackIV"
+            app:layout_constraintTop_toTopOf="@+id/startStopTrackIV"
+            app:tint="@color/colorPrimary" />
+
+        <ImageView
+            android:id="@+id/previousTrackIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/noneTrackNameLoaded"
+            android:src="@drawable/ic_baseline_skip_previous_48"
+            app:layout_constraintEnd_toStartOf="@+id/startStopTrackIV"
+            app:layout_constraintTop_toTopOf="@+id/startStopTrackIV"
+            app:tint="@color/colorPrimary" />
+
+        <ImageView
+            android:id="@+id/startStopTrackIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/startStopTrackIVDescription"
+            android:src="@drawable/ic_baseline_play_arrow_48"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimary" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>

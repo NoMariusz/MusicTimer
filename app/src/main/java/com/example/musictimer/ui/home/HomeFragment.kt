@@ -2,12 +2,18 @@ package com.example.musictimer.ui.home
 
 import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AnticipateOvershootInterpolator
-import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.Button
+import android.widget.HorizontalScrollView
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.example.musictimer.*
@@ -17,7 +23,6 @@ import com.example.musictimer.mechanisms.MusicPlayer
 
 class HomeFragment : Fragment() {
     private val mytag = "HomeFragment"
-    private var musicManageVisible = false
     private var slidingTrackNameAnimator: ObjectAnimator? = null
 
     override fun onCreateView(
@@ -33,11 +38,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(mytag, "onViewCreated - start")
 
-        val rightBtn: Button? = view.findViewById(R.id.rightBtn)
-        val showMusicManagerIV: ImageView? = view.findViewById(R.id.showMusicManageIV)
         view.setOnClickListener{startTimer()}
+        val rightBtn: Button? = view.findViewById(R.id.rightBtn)
         rightBtn?.setOnClickListener{ resetTimer()}
-        showMusicManagerIV?.setOnClickListener { changeVisibilityMusicManageBlock() }
 
         // music manage operations
         val startStopTrackIV: ImageView? = view.findViewById(R.id.startStopTrackIV)
@@ -46,9 +49,6 @@ class HomeFragment : Fragment() {
         nextTrackIV?.setOnClickListener { nextTrack() }
         val previousTrackIV: ImageView? = view.findViewById(R.id.previousTrackIV)
         previousTrackIV?.setOnClickListener { previousTrack() }
-        // adding blank listener in lay to prevent view click events on this block
-        val musicManageLayout: ConstraintLayout? = view.findViewById(R.id.MusicManageLayout)
-        musicManageLayout?.setOnClickListener { }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -60,14 +60,6 @@ class HomeFragment : Fragment() {
         loadTimerStatus()
 
         val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
-        // listener to start/cancel sliding animation when actualTrackTV change his layout
-        actualTrackTV?.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            if (actualTrackTV.text.toString() == resources.getString(R.string.noneTrackNameLoaded)){
-                slidingTrackNameAnimator?.cancel()
-            } else if (musicManageVisible) {
-                startSlidingNameAnimation()
-            }
-        }
         // observer to update actualTackTV
         MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
             data?.let {
@@ -78,6 +70,7 @@ class HomeFragment : Fragment() {
                     stopMusic()
                 }
                 actualTrackTV?.text = newTrackName
+                makeAfterDelay({ refreshSlidingAnimation() }, 50)
             }
         })
     }
@@ -93,18 +86,6 @@ class HomeFragment : Fragment() {
             modifyUiAtStopMusic()
             modifyUiAtStop()
         }
-    }
-
-    private fun changeVisibilityMusicManageBlock(){
-        val musicManageLay: ConstraintLayout? = view?.findViewById(R.id.MusicManageLayout)
-        val showMusicManagerIV: ImageView? = view?.findViewById(R.id.showMusicManageIV)
-        if (musicManageVisible){
-            musicManageLay?.visibility = View.GONE
-        } else {
-            musicManageLay?.visibility = View.VISIBLE
-        }
-        showMusicManagerIV?.rotation = 180F + showMusicManagerIV?.rotation!!
-        musicManageVisible = !musicManageVisible
     }
 
     private fun startSlidingNameAnimation() {
@@ -123,6 +104,20 @@ class HomeFragment : Fragment() {
             duration = animTime
             start()
         }
+    }
+
+    private fun refreshSlidingAnimation(){
+        val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
+        if (actualTrackTV?.text.toString() != resources.getString(R.string.noneTrackNameLoaded)){
+            startSlidingNameAnimation()
+        } else{
+            slidingTrackNameAnimator?.cancel()
+            slidingTrackNameAnimator = null
+        }
+    }
+
+    private fun makeAfterDelay(func: () -> Unit, delay: Long){
+        Handler().postDelayed(func, delay)
     }
 
     // btn and iv events

@@ -66,13 +66,13 @@ class TracksFragment : Fragment() {
 
     private fun updateBtnClicked() {
         Log.d(mytag, "updateBtnClicked() - start")
-        checkPerrmisions()
+        checkPermissions()
     }
 
-    private fun checkPerrmisions(){
+    private fun checkPermissions(){
         if (context != null){
-            val checkedPerrmisions = ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE)
-            if (checkedPerrmisions == PackageManager.PERMISSION_GRANTED){
+            val checkedPermissions = ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            if (checkedPermissions == PackageManager.PERMISSION_GRANTED){
                 Log.d(mytag, "checkPerrmisions() - PERMISSION_GRANTED")
                 startUpdatingTracks()
             } else {
