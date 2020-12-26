@@ -10,13 +10,12 @@ import kotlinx.coroutines.launch
 
 class MusicViewModel(application: Application): AndroidViewModel(application) {
 
+    private val TAG = "MusicViewModel"
     private val repository: MusicRepository
     val allTracks: LiveData<List<Track>>
     val allThemes: LiveData<List<MusicTheme>>
     val selectedThemeInformationEntities: LiveData<List<InformationEntity>>
     val allThemesTracksReferences: LiveData<List<TracksThemesCrossReference>>
-
-    var viewModelOperationEnded: MutableLiveData<Boolean>
 
     init {
         val musicDao = MusicDatabase.getDatabase(application, viewModelScope).musicDao()
@@ -26,8 +25,6 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         allTracks = repository.allTracks
         allThemes = repository.allThemes
         selectedThemeInformationEntities = repository.selectedThemeInformation
-
-        viewModelOperationEnded = MutableLiveData(false)
     }
 
     fun setNeededBlankDataObservers(lifecycleOwner: LifecycleOwner,observeDataList: List<LiveData<out List<Any>>>){
@@ -74,16 +71,6 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         val selectedTheme = getSelectedTheme()
         return getThemeTracks(selectedTheme)
     }
-
-//    fun getSelectedThemeTracksValues(): List<String> {
-//        val values = mutableListOf<String>()
-//        val selectedThemeTracks = getSelectedThemeTracks()
-//
-//        for (va in selectedThemeTracks){
-//            values.add(va.value)
-//        }
-//        return values
-//    }
 
     private fun getMainInfoEntity(): InformationEntity {
         // do not invoke when selectedThemeInformationEntities are not updated form base
@@ -141,7 +128,7 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
 
     suspend fun suspendUpdateThemeAndHisTracks(themeId: Long, tempTheme: MusicTheme, tracks: List<Track>) {
         val theme = repository.getThemeById(themeId)
-        Log.d("MusicViewModel", "suspend updateThemeWithTracks() - start - theme: $theme")
+        Log.d(TAG, "suspend updateThemeWithTracks() - start - theme: $theme")
         theme.isUpdating = true
         theme.name = tempTheme.name
         theme.random = tempTheme.random
@@ -152,12 +139,12 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
 
         theme.isUpdating = false
         repository.updateTheme(theme)
-        Log.d("MusicViewModel", "suspend updateThemeWithTracks() - themeWithTracks end")
+        Log.d(TAG, "suspend updateThemeWithTracks() - themeWithTracks end")
     }
 
     fun addThemeWithTracksByIds(themeTracksIds: Array<Long>, themeId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val theme = repository.getThemeById(themeId)
-        Log.d("MusicViewModel", "addThemeWithTracksByIds(), themeId: $themeId, got theme: $theme")
+        Log.d(TAG, "addThemeWithTracksByIds(), themeId: $themeId, got theme: $theme")
         theme.isUpdating = true
         repository.updateTheme(theme)
 
@@ -185,39 +172,39 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
     }
 
     suspend fun suspendDeleteTheme(theme: MusicTheme) {
-        Log.d("MusicViewModel", "suspendDeleteTheme() - theme: $theme")
+        Log.d(TAG, "suspendDeleteTheme() - theme: $theme")
         theme.isSelfDeleting = true
         repository.updateTheme(theme)
         if (getSelectedTheme() == theme){
             setSelectedThemeById(getFirstTheme().themeId)
         }
         repository.deleteAllThemeTracks(theme.themeId)
-        Log.d("MusicViewModel", "suspendDeleteTheme() - end deleting all references")
+        Log.d(TAG, "suspendDeleteTheme() - end deleting all references")
         repository.deleteTheme(theme)
-        Log.d("MusicViewModel", "suspendDeleteTheme() - end deleting theme")
+        Log.d(TAG, "suspendDeleteTheme() - end deleting theme")
     }
 
     // special function for updating tracks in TracksFragment
-    fun updateTracks(tracks: List<Track>, parent: TracksFragment) = viewModelScope.launch(Dispatchers.IO) {
-        Log.d("MusicViewModel", "updateTracks() - start")
-        viewModelOperationEnded.postValue(false)
-        // deleting all tracks in base without names or vals in actual device music scan list
+    suspend fun updateTracks(tracks: List<Track>, parent: TracksFragment?) {
+        Log.d(TAG, "updateTracks() - start")
+        parent?.prepareProgressBar(tracks.size)
+        // deleting all tracks in base without names or values in actual device music scan list
         val namesList = tracks.map { track -> track.name }
-        val valsList = tracks.map { track -> track.value }
+        val valuesList = tracks.map { track -> track.value }
         for (aTrack in allTracks.value!!) {
-            if ((aTrack.name !in namesList) and (aTrack.value !in valsList)){
+            if ((aTrack.name !in namesList) and (aTrack.value !in valuesList)){
                 repository.deleteTrackWithRefrences(aTrack)
             }
-            parent.appendToProgressBar()
+            parent?.appendToProgressBar()
         }
         // adding new tracks or updating that with is moved or renamed
         val actualNamesList = allTracks.value?.map { track -> track.name } ?: listOf()
-        val actualValsList = allTracks.value?.map { track -> track.value } ?: listOf()
+        val actualValuesList = allTracks.value?.map { track -> track.value } ?: listOf()
         val tracksToUpdate = mutableListOf<Track>()
         val tracksToInsert = mutableListOf<Track>()
         for (track in tracks){
             val nameInBase = track.name in actualNamesList
-            val uriValueInBase = track.value in actualValsList
+            val uriValueInBase = track.value in actualValuesList
             if (!(nameInBase and uriValueInBase)) {
                 when {
                     nameInBase -> {        // on renaming file
@@ -230,17 +217,17 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
                         track.trackId = actualTrack.trackId
                         tracksToUpdate.add(track)
                     }
-                    else -> {                        // on adding new file
+                    else -> {               // on adding new file
                         tracksToInsert.add(track)
                     }
                 }
             }
-            parent.appendToProgressBar()
+            parent?.appendToProgressBar()
         }
         repository.updateTracks(tracksToUpdate)
         repository.addTracks(tracksToInsert)
-        parent.appendToProgressBar()
-        viewModelOperationEnded.postValue(true)
-        Log.d("MusicViewModel", "updateTracks() - end")
+        parent?.appendToProgressBar()
+        parent?.modifyUiAtEndUpdate()
+        Log.d(TAG, "updateTracks() - end")
     }
 }

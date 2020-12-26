@@ -113,8 +113,6 @@ class EditTheme : AppCompatActivity() {
                     editThemeViewModel.tracksToSave = null
                 }
                 updateThemeServiceConnectionManager.unbindFromService()
-            } else {
-                Log.d(mytag, "editThemeViewModel.updateThemeBinder - get null service")
             }
         })
 
@@ -141,25 +139,20 @@ class EditTheme : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        Log.d(mytag, "onStop() - this $this")
-    }
-
     override fun onResume() {
         super.onResume()
         tracksAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        Log.d(mytag, "OnCreateOptionsMenu - start")
+//        Log.d(mytag, "OnCreateOptionsMenu - start")
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.edit_theme_menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(mytag, "OnOptionsItemSelected - start")
+//        Log.d(mytag, "OnOptionsItemSelected - start")
         if (item.itemId == R.id.deleteTheme){
             deleteThemeBtnClick()
             return true
@@ -180,7 +173,7 @@ class EditTheme : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(mytag, "onDestroy() - this $this")
+//        Log.d(mytag, "onDestroy() - this $this")
         updateThemeServiceConnectionManager.unbindFromService()
     }
 

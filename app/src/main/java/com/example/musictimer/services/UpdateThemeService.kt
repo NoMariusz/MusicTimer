@@ -26,13 +26,6 @@ class UpdateThemeService: Service() {
         super.onCreate()
         Log.d(mytag, "onCreate(), this $this")
         musicViewModel = MusicViewModel(application)
-
-        // code to stop service after 5 minutes of work, because service not work correctly
-        // after app is killed and it will work forever without this
-        val timer = Timer()
-        timer.schedule(300000) {
-            killSelf()
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

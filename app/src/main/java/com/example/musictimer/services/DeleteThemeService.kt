@@ -28,13 +28,6 @@ class DeleteThemeService : Service() {
     override fun onCreate() {
         super.onCreate()
         musicViewModel = MusicViewModel(application)
-
-        // code to stop service after 5 minutes of work, because service not work correctly
-        // after app is killed and it will work forever without this
-        val timer = Timer()
-        timer.schedule(300000, 1) {
-            stopSelf()
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -42,7 +35,7 @@ class DeleteThemeService : Service() {
     }
 
     fun startDeletingTheme(theme: MusicTheme, lifecycleOwner: LifecycleOwner){
-        // making observers to needed musicViewModel livedatas, and start deleting when all data are
+        // making observers to needed musicViewModel liveData, and start deleting when all data are
         // loaded
         musicViewModel.allThemes.observe(lifecycleOwner, Observer {
             allThemesLoaded = true
@@ -69,11 +62,6 @@ class DeleteThemeService : Service() {
         musicViewModel.suspendDeleteTheme(theme)
         Log.d(mytag, "startDeletingTheme - theme deleted, stopping self")
         stopSelf()
-    }
-
-    override fun onDestroy() {
-        Log.d(mytag, "onDestroy")
-        super.onDestroy()
     }
 
     inner class DeleteThemeBinder : Binder(){
