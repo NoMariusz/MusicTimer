@@ -175,11 +175,10 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         Log.d(TAG, "suspendDeleteTheme() - theme: $theme")
         theme.isSelfDeleting = true
         repository.updateTheme(theme)
-        if (getSelectedTheme() == theme){
+        if (getMainInfoEntity().selectedThemeId == theme.themeId){
             setSelectedThemeById(getFirstTheme().themeId)
         }
         repository.deleteAllThemeTracks(theme.themeId)
-        Log.d(TAG, "suspendDeleteTheme() - end deleting all references")
         repository.deleteTheme(theme)
         Log.d(TAG, "suspendDeleteTheme() - end deleting theme")
     }
