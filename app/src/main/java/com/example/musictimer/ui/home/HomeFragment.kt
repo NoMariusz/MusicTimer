@@ -1,6 +1,8 @@
 package com.example.musictimer.ui.home
 
 import android.animation.ObjectAnimator
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -16,14 +18,19 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.musictimer.*
 import com.example.musictimer.mechanisms.MainTimer
 import com.example.musictimer.mechanisms.MusicPlayer
+import com.example.musictimer.services.TimerAndPlayerService
 
 
 class HomeFragment : Fragment() {
     private val mytag = "HomeFragment"
     private var slidingTrackNameAnimator: ObjectAnimator? = null
+    private var mainTimer: MainTimer? = null
+    
+    private lateinit var mainActivityViewModel: MainActivityViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,10 +62,6 @@ class HomeFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         Log.d(mytag, "onActivityCreated - start")
 
-        MainTimer.parrent = this
-        MainTimer.loadTimeToUi()
-        loadTimerStatus()
-
         val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
         // observer to update actualTackTV
         MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
@@ -73,19 +76,55 @@ class HomeFragment : Fragment() {
                 makeAfterDelay({ refreshSlidingAnimation() }, 50)
             }
         })
+    
+        // start time and player service
+        mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+        mainActivityViewModel.timerAndPlayerBinder.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                Log.d(mytag, "onActivityCreated: mainActivityViewModel.timerAndPlayerBinder get service $it")
+                val timerAndPlayerService = it.getService()
+                mainTimer = timerAndPlayerService.mainTimer
+//                mainTimer?.parrent = this
+//                mainTimer?.loadTimeToUi()
+                loadTimerStatus()
+//                context?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
+                mainTimer?.time?.observe(viewLifecycleOwner, Observer { time ->
+                    loadTimeToUi(time[0], time[1])
+                })
+            }
+        })
+
+        val intent = Intent(activity, TimerAndPlayerService::class.java)
+        activity?.startService(intent)
+        activity?.bindService(intent, mainActivityViewModel.timerAndPlayerServiceConnection,
+            Context.BIND_AUTO_CREATE)
+//            0)
+    }
+
+    override fun onDestroyView() {
+        activity?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
+        super.onDestroyView()
     }
 
     private fun loadTimerStatus() {
-        Log.d(mytag, "loadTimerStatus - status ${MainTimer.timerStatus}")
-        if (MainTimer.timerStatus == TIMER_RUNNING) {
+        Log.d(mytag, "loadTimerStatus - status ${mainTimer?.timerStatus}")
+        if (mainTimer?.timerStatus == TIMER_RUNNING) {
             modifyUiAtStart()
             modifyUiAtStartMusic()
             activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-        if (MainTimer.timerStatus == TIMER_STOPPED) {
+        if (mainTimer?.timerStatus == TIMER_STOPPED) {
             modifyUiAtStopMusic()
             modifyUiAtStop()
         }
+    }
+
+    fun loadTimeToUi(minutes: Long, seconds: Long) {
+        val timerText: TextView? = activity?.findViewById(R.id.timerText)
+        timerText?.text = "%02d:%02d".format(
+            minutes,
+            seconds
+        )
     }
 
     private fun startSlidingNameAnimation() {
@@ -126,7 +165,7 @@ class HomeFragment : Fragment() {
     private fun startTimer() {
         Log.d(mytag, "startTimer()")
         MusicPlayer.loadMusic()
-        MainTimer.startMainTimer()
+        mainTimer?.startMainTimer()
         modifyUiAtStart()
         startMusicClick()
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -135,7 +174,7 @@ class HomeFragment : Fragment() {
 
     private fun stopTimer() {
         Log.d(mytag, "stopTimer()")
-        MainTimer.pauseTimer()
+        mainTimer?.pauseTimer()
         modifyUiAtStop()
         stopMusicClick()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -143,10 +182,10 @@ class HomeFragment : Fragment() {
 
     private fun resetTimer() {
         Log.d(mytag, "resetTimer()")
-        MainTimer.pauseTimer()
+        mainTimer?.pauseTimer()
 
-        MainTimer.resetTime()
-        MainTimer.loadTimeToUi()
+        mainTimer?.resetTime()
+//        mainTimer?.loadTimeToUi()
 
         modifyUiAtReset()
         stopMusic()
@@ -156,7 +195,7 @@ class HomeFragment : Fragment() {
 
     private fun resumeTimer() {
         Log.d(mytag, "resumeTimer()")
-        MainTimer.startMainTimer(resetTime = false)
+        mainTimer?.startMainTimer(resetTime = false)
         modifyUiAtResume()
         startMusicClick()
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -164,7 +203,7 @@ class HomeFragment : Fragment() {
 
     // only music, modify music manage ui
     private inline fun onlyAtTimerRunningDec(strict: Boolean = false, func: () -> Unit){
-        if (MainTimer.timerStatus != TIMER_NOT_STARTED && !(strict && !MusicPlayer.isPlaying())) {
+        if (mainTimer?.timerStatus != TIMER_NOT_STARTED && !(strict && !MusicPlayer.isPlaying())) {
             func()
         } else {
             playMusicManageLayLockedAnimation()

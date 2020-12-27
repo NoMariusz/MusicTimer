@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.musictimer.services.DeleteThemeService
 import com.example.musictimer.services.LoadTracksService
+import com.example.musictimer.services.TimerAndPlayerService
 
 class MainActivityViewModel: ViewModel() {
     val mytag = "MainActivityViewModel"
@@ -18,6 +19,9 @@ class MainActivityViewModel: ViewModel() {
 
     val loadTracksServiceConnection: ServiceConnection = LoadTracksServiceConnection()
     val loadTracksBinder = MutableLiveData<LoadTracksService.LoadTracksBinder>()
+
+    val timerAndPlayerServiceConnection: ServiceConnection = TimerAndPlayerServiceConnection()
+    val timerAndPlayerBinder = MutableLiveData<TimerAndPlayerService.TimerAndPlayerBinder>()
 
     inner class DeleteThemeServiceConnection : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -42,6 +46,19 @@ class MainActivityViewModel: ViewModel() {
         override fun onServiceDisconnected(name: ComponentName?) {
 //            Log.d(mytag, "LoadTracksServiceConnection onServiceDisconnected()")
             loadTracksBinder.postValue(null)
+        }
+    }
+
+    inner class TimerAndPlayerServiceConnection: ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.d(mytag, "TimerAndPlayerServiceConnection onServiceConnected()")
+            val binder: TimerAndPlayerService.TimerAndPlayerBinder? = service as TimerAndPlayerService.TimerAndPlayerBinder?
+            timerAndPlayerBinder.postValue(binder)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(mytag, "TimerAndPlayerServiceConnection onServiceDisconnected()")
+            timerAndPlayerBinder.postValue(null)
         }
     }
 

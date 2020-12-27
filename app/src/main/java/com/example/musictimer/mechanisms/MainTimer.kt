@@ -1,9 +1,8 @@
 package com.example.musictimer.mechanisms
 
 import android.util.Log
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import com.example.musictimer.R
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.musictimer.TIMER_NOT_STARTED
 import com.example.musictimer.TIMER_RUNNING
 import com.example.musictimer.TIMER_STOPPED
@@ -12,15 +11,16 @@ import kotlin.concurrent.schedule
 import java.util.concurrent.TimeUnit
 import java.util.Calendar
 
-object MainTimer {
-    var parrent: Fragment? = null
-    private const val mytag = "MainTimer"
+class MainTimer {
+    private val mytag = "MainTimer"
 
-    private var seconds: Long = 0
-    private var minutes: Long = 0
+    private val _time = MutableLiveData<List<Long>>()
+    val time: LiveData<List<Long>>
+        get() = _time
+
     private var startTime: Long = 0
     private var stopTime: Long = 0
-    private const val millisecondsPrecision = 100  // how precise is timer tick
+    private val millisecondsPrecision = 100  // how precise is timer tick
     private var mainTimer = Timer()
     var timerStatus = TIMER_NOT_STARTED
 
@@ -48,13 +48,15 @@ object MainTimer {
 
     private fun timerClick() {
         val workingTime: Long = Calendar.getInstance().time.time - startTime
+        val tempMinutes = TimeUnit.MILLISECONDS.toMinutes(workingTime)
+        _time.postValue(listOf(
+            tempMinutes,
+            TimeUnit.MILLISECONDS.toSeconds(workingTime) - TimeUnit.MINUTES.toSeconds(tempMinutes)
+        ))
 
-        minutes = TimeUnit.MILLISECONDS.toMinutes(workingTime)
-        seconds = TimeUnit.MILLISECONDS.toSeconds(workingTime) - TimeUnit.MINUTES.toSeconds(minutes)
-
-        parrent?.activity?.runOnUiThread {
-            loadTimeToUi()
-        }
+//        parrent?.activity?.runOnUiThread {
+//            loadTimeToUi()
+//        }
     }
 
     fun pauseTimer() {
@@ -65,19 +67,16 @@ object MainTimer {
         stopTime = Calendar.getInstance().time.time
     }
 
-    fun loadTimeToUi() {
-        val timerText: TextView? = parrent?.activity?.findViewById(
-            R.id.timerText
-        )
-        timerText?.text = "%02d:%02d".format(
-            minutes,
-            seconds
-        )
-    }
+//    fun loadTimeToUi() {
+//        val timerText: TextView? = parrent?.activity?.findViewById(R.id.timerText)
+//        timerText?.text = "%02d:%02d".format(
+//            minutes,
+//            seconds
+//        )
+//    }
 
     fun resetTime() {
-        seconds = 0
-        minutes = 0
+        _time.postValue(listOf(0, 0))
         timerStatus =
             TIMER_NOT_STARTED
     }

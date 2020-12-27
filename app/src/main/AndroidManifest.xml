@@ -26,6 +26,7 @@
         <service android:name=".services.UpdateThemeService" />
         <service android:name=".services.DeleteThemeService" />
         <service android:name=".services.LoadTracksService" />
+        <service android:name=".services.TimerAndPlayerService" />
     </application>
 
 </manifest>
