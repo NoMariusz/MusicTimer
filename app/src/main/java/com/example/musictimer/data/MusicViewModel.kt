@@ -183,7 +183,7 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         Log.d(TAG, "suspendDeleteTheme() - end deleting theme")
     }
 
-    // special function for updating tracks in TracksFragment
+    // special function for updating tracks in LoadTracksService
     suspend fun updateTracks(tracks: List<Track>, parent: TracksFragment?) {
         Log.d(TAG, "updateTracks() - start")
         parent?.prepareProgressBar(tracks.size)

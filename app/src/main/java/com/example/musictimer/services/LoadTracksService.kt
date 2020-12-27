@@ -1,6 +1,5 @@
 package com.example.musictimer.services
 
-import android.app.Service
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,7 +10,9 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.Observer
+import com.example.musictimer.LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM
 import com.example.musictimer.data.MusicViewModel
 import com.example.musictimer.data.Track
 import com.example.musictimer.ui.tracks.TracksFragment
@@ -20,10 +21,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class LoadTracksService: Service() {
+class LoadTracksService: LifecycleService() {
     private val TAG = "LoadTracksService"
     private val loadTracksBinder: IBinder = LoadTracksBinder()
-    private lateinit var parent: Fragment
+    private var parent: Fragment? = null
     private lateinit var musicViewModel: MusicViewModel
     private var neededDataLoadedCount = 0
     private lateinit var tracks: List<Track>
@@ -31,23 +32,32 @@ class LoadTracksService: Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "onCreate: start")
+//        Log.d(TAG, "onCreate: start")
         musicViewModel = MusicViewModel(application)
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-//        Log.d(TAG, "onBind: ")
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand:")
+        if (intent?.getBooleanExtra(LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM, false) == true) {
+            startWork(null, false)
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onBind(intent: Intent): IBinder {
+        super.onBind(intent)
+        Log.d(TAG, "onBind: ")
         return loadTracksBinder
     }
 
-    fun startWork(gotParent: Fragment, isStartedFromTracksFragment: Boolean){
+    fun startWork(gotParent: Fragment?, isStartedFromTracksFragment: Boolean){
         Log.d(TAG, "startWork: isStartedFromTracksFragment $isStartedFromTracksFragment")
         parent = gotParent
         startedFromTracksFragment = isStartedFromTracksFragment
         if (checkPermissions()){    // if has permissions then update tracks
             startUpdatingTracks()
         } else {    // if has not permissions then request it and check again
-            parent.requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+            parent?.requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
             if (checkPermissions()) {
                 startUpdatingTracks()
             } else {
@@ -57,7 +67,7 @@ class LoadTracksService: Service() {
     }
 
     private fun checkPermissions(): Boolean{
-        val context = parent.context
+        val context = baseContext
         if (context != null) {
             val checkedPermissions = ContextCompat.checkSelfPermission(
                 context, android.Manifest.permission.READ_EXTERNAL_STORAGE
@@ -69,11 +79,11 @@ class LoadTracksService: Service() {
 
     private fun startUpdatingTracks(){
         // loading data in musicViewModel
-        musicViewModel.allTracks.observe(parent, Observer {
+        musicViewModel.allTracks.observe(this, Observer {
             if (it != null){ dataToUpdateLoaded() }
         })
 
-        musicViewModel.allThemesTracksReferences.observe(parent, Observer {
+        musicViewModel.allThemesTracksReferences.observe(this, Observer {
             if (it != null){ dataToUpdateLoaded() }
         })
         
@@ -116,7 +126,7 @@ class LoadTracksService: Service() {
         // Display audios in alphabetical order based on their display name.
         val sortOrder = "${MediaStore.Audio.Media.DISPLAY_NAME} ASC"
 
-        val contextResolver = parent.context?.contentResolver
+        val contextResolver = contentResolver
         val query = contextResolver?.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
@@ -145,7 +155,7 @@ class LoadTracksService: Service() {
                 audioList.add(Track(0, name, contentUri.toString()))
             }
         }
-        Log.d(TAG, "get videos length ${audioList.size}")
+//        Log.d(TAG, "get videos length ${audioList.size}")
         return audioList
     }
 

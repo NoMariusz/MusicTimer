@@ -52,7 +52,7 @@ class DeleteThemeService : Service() {
     }
 
     private fun checkAllNecessaryLiveDataLoaded(): Boolean {
-        return (allThemesLoaded && allThemeTracksRefLoaded && selectedThemeInfoLoaded) && ! deletingStarted
+        return (allThemesLoaded && allThemeTracksRefLoaded && selectedThemeInfoLoaded) && !deletingStarted
     }
 
     private fun deleteTheme(theme: MusicTheme) = GlobalScope.launch(Dispatchers.IO) {

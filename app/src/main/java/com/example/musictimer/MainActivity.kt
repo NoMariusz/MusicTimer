@@ -1,8 +1,12 @@
 package com.example.musictimer
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +23,7 @@ import com.example.musictimer.data.MusicTheme
 import com.example.musictimer.data.MusicViewModel
 import com.example.musictimer.mechanisms.MusicPlayer
 import com.example.musictimer.services.DeleteThemeService
+import com.example.musictimer.services.LoadTracksService
 import com.google.android.material.navigation.NavigationView
 
 
@@ -83,6 +88,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home, R.id.nav_gallery, R.id.tracksFragment), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        startUpdatingTracksService()
     }
 
     override fun onPause() {
@@ -101,6 +108,11 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
+    override fun onDestroy() {
+        Log.d(mytag, "Destroy")
+        super.onDestroy()
+    }
+
     private fun startDeletingThemeService(){
         val intent = Intent(this, DeleteThemeService::class.java)
         startService(intent)
@@ -108,8 +120,20 @@ class MainActivity : AppCompatActivity() {
         Log.d(mytag, "startDeletingThemeService() - end, service start binding")
     }
 
-    override fun onDestroy() {
-        Log.d(mytag, "Destroy")
-        super.onDestroy()
+    private fun startUpdatingTracksService() {  // set alarm that fires service to update tracks
+        Log.d(mytag, "startUpdatingTracksService: start")
+        val alarmMgr: AlarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent: PendingIntent = Intent(applicationContext, LoadTracksService::class.java).let { intent ->
+            intent.putExtra(LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM, true)
+            PendingIntent.getService(applicationContext, 0, intent, 0)
+        }
+
+//        alarmMgr.cancel(alarmIntent)  // cancel to override existing alarm
+        alarmMgr.setInexactRepeating(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime(),
+            DateUtils.WEEK_IN_MILLIS,
+            alarmIntent
+        )
     }
 }
