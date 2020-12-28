@@ -1,5 +1,6 @@
 package com.example.musictimer.mechanisms
 
+import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
@@ -11,9 +12,9 @@ import com.example.musictimer.data.MusicViewModel
 import com.example.musictimer.data.Track
 import kotlin.random.Random
 
-object MusicPlayer {
+class MusicPlayer {
     private var parentContext: Context? = null
-    private const val mytag = "MusicPlayer"
+    private val mytag = "MusicPlayer"
     private var mediaPlayer: MediaPlayer? = null
     private var playList: Array<Track>? = null
     private var playlistTrackIndex: Int = 0
@@ -21,7 +22,10 @@ object MusicPlayer {
     enum class IndexOperations {
         INCREASE, DECREASE
     }
-    var actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
+    private val _actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
+    val actualTrackName: LiveData<String?>
+        get() = _actualTrackName
+
 
     private lateinit var musicViewModel: MusicViewModel
 
@@ -29,9 +33,9 @@ object MusicPlayer {
         Log.d(mytag, " - init")
     }
 
-    fun preparePlayer(context: Context, viewModelStoreOwner: ViewModelStoreOwner, lifecycleOwner: LifecycleOwner){
+    fun preparePlayer(context: Context, application: Application, lifecycleOwner: LifecycleOwner){
         parentContext = context
-        musicViewModel = ViewModelProvider(viewModelStoreOwner).get(MusicViewModel::class.java)
+        musicViewModel = MusicViewModel(application)
         musicViewModel.setNeededBlankDataObservers(lifecycleOwner, listOf(
             musicViewModel.selectedThemeInformationEntities, musicViewModel.allThemes,
             musicViewModel.allThemesTracksReferences, musicViewModel.allTracks))
@@ -56,7 +60,7 @@ object MusicPlayer {
                 mediaPlayer = MediaPlayer.create(
                     parentContext, Uri.parse(track.value))
                 Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
-                actualTrackName.postValue(track.name)
+                _actualTrackName.postValue(track.name)
             }
         } else {
             mediaPlayer = null
@@ -80,7 +84,7 @@ object MusicPlayer {
         } else {
             mediaPlayer?.release()
             mediaPlayer = null
-            actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
+            _actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
         }
     }
 
@@ -161,7 +165,7 @@ object MusicPlayer {
         Log.d(mytag, "disableMusic - start")
         mediaPlayer?.release()
         mediaPlayer = null
-        actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
+        _actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
     }
 
     fun nextSong() {

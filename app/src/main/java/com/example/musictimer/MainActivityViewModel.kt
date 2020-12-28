@@ -51,8 +51,8 @@ class MainActivityViewModel: ViewModel() {
 
     inner class TimerAndPlayerServiceConnection: ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.d(mytag, "TimerAndPlayerServiceConnection onServiceConnected()")
             val binder: TimerAndPlayerService.TimerAndPlayerBinder? = service as TimerAndPlayerService.TimerAndPlayerBinder?
+            Log.d(mytag, "TimerAndPlayerServiceConnection onServiceConnected() ${binder?.getService()}")
             timerAndPlayerBinder.postValue(binder)
         }
 

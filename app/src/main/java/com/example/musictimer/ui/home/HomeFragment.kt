@@ -1,7 +1,6 @@
 package com.example.musictimer.ui.home
 
 import android.animation.ObjectAnimator
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -29,6 +28,7 @@ class HomeFragment : Fragment() {
     private val mytag = "HomeFragment"
     private var slidingTrackNameAnimator: ObjectAnimator? = null
     private var mainTimer: MainTimer? = null
+    private var musicPlayer: MusicPlayer? = null
     
     private lateinit var mainActivityViewModel: MainActivityViewModel
 
@@ -63,46 +63,43 @@ class HomeFragment : Fragment() {
         Log.d(mytag, "onActivityCreated - start")
 
         val actualTrackTV: TextView? = view?.findViewById(R.id.actualTrackNameText)
-        // observer to update actualTackTV
-        MusicPlayer.actualTrackName.observe(viewLifecycleOwner, Observer { data ->
-            data?.let {
-                Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
-                var newTrackName: String = it
-                if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
-                    newTrackName = resources.getString(R.string.noneTrackNameLoaded)
-                    stopMusic()
-                }
-                actualTrackTV?.text = newTrackName
-                makeAfterDelay({ refreshSlidingAnimation() }, 50)
-            }
-        })
     
         // start time and player service
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         mainActivityViewModel.timerAndPlayerBinder.observe(viewLifecycleOwner, Observer {
             if (it != null) {
-                Log.d(mytag, "onActivityCreated: mainActivityViewModel.timerAndPlayerBinder get service $it")
+                Log.d(mytag, "onActivityCreated: timerAndPlayerBinder get service ${it.getService()}")
                 val timerAndPlayerService = it.getService()
                 mainTimer = timerAndPlayerService.mainTimer
-//                mainTimer?.parrent = this
-//                mainTimer?.loadTimeToUi()
+                musicPlayer = timerAndPlayerService.musicPlayer
                 loadTimerStatus()
-//                context?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
                 mainTimer?.time?.observe(viewLifecycleOwner, Observer { time ->
                     loadTimeToUi(time[0], time[1])
+                })
+                // observer to update actualTackTV
+                musicPlayer?.actualTrackName?.observe(viewLifecycleOwner, Observer { data ->
+                    data?.let {
+                        Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
+                        var newTrackName: String = it
+                        if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
+                            newTrackName = resources.getString(R.string.noneTrackNameLoaded)
+                            stopMusic()
+                        }
+                        actualTrackTV?.text = newTrackName
+                        makeAfterDelay({ refreshSlidingAnimation() }, 50)
+                    }
                 })
             }
         })
 
         val intent = Intent(activity, TimerAndPlayerService::class.java)
-        activity?.startService(intent)
-        activity?.bindService(intent, mainActivityViewModel.timerAndPlayerServiceConnection,
-            Context.BIND_AUTO_CREATE)
-//            0)
+        activity?.applicationContext?.startService(intent)
+        activity?.applicationContext?.bindService(intent, mainActivityViewModel.timerAndPlayerServiceConnection, 0)
     }
 
     override fun onDestroyView() {
-        activity?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
+        Log.d(mytag, "onDestroyView: ")
+        activity?.applicationContext?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
         super.onDestroyView()
     }
 
@@ -119,7 +116,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    fun loadTimeToUi(minutes: Long, seconds: Long) {
+    private fun loadTimeToUi(minutes: Long, seconds: Long) {
         val timerText: TextView? = activity?.findViewById(R.id.timerText)
         timerText?.text = "%02d:%02d".format(
             minutes,
@@ -164,7 +161,7 @@ class HomeFragment : Fragment() {
     // music and timer
     private fun startTimer() {
         Log.d(mytag, "startTimer()")
-        MusicPlayer.loadMusic()
+        musicPlayer?.loadMusic()
         mainTimer?.startMainTimer()
         modifyUiAtStart()
         startMusicClick()
@@ -189,7 +186,7 @@ class HomeFragment : Fragment() {
 
         modifyUiAtReset()
         stopMusic()
-        MusicPlayer.disableMusic()
+        musicPlayer?.disableMusic()
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
@@ -203,7 +200,7 @@ class HomeFragment : Fragment() {
 
     // only music, modify music manage ui
     private inline fun onlyAtTimerRunningDec(strict: Boolean = false, func: () -> Unit){
-        if (mainTimer?.timerStatus != TIMER_NOT_STARTED && !(strict && !MusicPlayer.isPlaying())) {
+        if (mainTimer?.timerStatus != TIMER_NOT_STARTED && !(strict && musicPlayer?.isPlaying() == false)) {
             func()
         } else {
             playMusicManageLayLockedAnimation()
@@ -226,7 +223,7 @@ class HomeFragment : Fragment() {
 
     private fun stopMusic(){
         modifyUiAtStopMusic()
-        MusicPlayer.pauseMusic()
+        musicPlayer?.pauseMusic()
     }
 
     private fun modifyUiAtStopMusic(){
@@ -237,7 +234,7 @@ class HomeFragment : Fragment() {
 
     private  fun startMusicClick() = onlyAtTimerRunningDec(true) {
         modifyUiAtStartMusic()
-        MusicPlayer.playMusic()
+        musicPlayer?.playMusic()
     }
 
     private fun modifyUiAtStartMusic(){
@@ -247,11 +244,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun nextTrack() = onlyAtTimerRunningDec {
-        MusicPlayer.nextSong()
+        musicPlayer?.nextSong()
     }
 
     private fun previousTrack() = onlyAtTimerRunningDec {
-        MusicPlayer.previousSong()
+        musicPlayer?.previousSong()
     }
 
     // main ui modify

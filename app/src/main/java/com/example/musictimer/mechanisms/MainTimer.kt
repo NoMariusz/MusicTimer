@@ -53,10 +53,6 @@ class MainTimer {
             tempMinutes,
             TimeUnit.MILLISECONDS.toSeconds(workingTime) - TimeUnit.MINUTES.toSeconds(tempMinutes)
         ))
-
-//        parrent?.activity?.runOnUiThread {
-//            loadTimeToUi()
-//        }
     }
 
     fun pauseTimer() {
@@ -66,14 +62,6 @@ class MainTimer {
             TIMER_STOPPED
         stopTime = Calendar.getInstance().time.time
     }
-
-//    fun loadTimeToUi() {
-//        val timerText: TextView? = parrent?.activity?.findViewById(R.id.timerText)
-//        timerText?.text = "%02d:%02d".format(
-//            minutes,
-//            seconds
-//        )
-//    }
 
     fun resetTime() {
         _time.postValue(listOf(0, 0))
