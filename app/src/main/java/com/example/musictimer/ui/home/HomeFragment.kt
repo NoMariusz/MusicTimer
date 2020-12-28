@@ -98,7 +98,7 @@ class HomeFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        Log.d(mytag, "onDestroyView: ")
+        Log.d(mytag, "onDestroyView TimerAndPlayerService unbinding: ")
         activity?.applicationContext?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
         super.onDestroyView()
     }

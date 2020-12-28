@@ -11,7 +11,7 @@ import kotlin.concurrent.schedule
 import java.util.concurrent.TimeUnit
 import java.util.Calendar
 
-class MainTimer {
+open class MainTimer {
     private val mytag = "MainTimer"
 
     private val _time = MutableLiveData<List<Long>>()
@@ -22,7 +22,7 @@ class MainTimer {
     private var stopTime: Long = 0
     private val millisecondsPrecision = 100  // how precise is timer tick
     private var mainTimer = Timer()
-    var timerStatus = TIMER_NOT_STARTED
+    open var timerStatus = TIMER_NOT_STARTED
 
     init {
         Log.d(mytag, "init")

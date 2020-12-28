@@ -17,3 +17,4 @@ const val ADD_TRACK_TO_THEME_SAVING_INTENT_TRACKS_IDS =
 const val ACTUAL_PLAYING_TRACK_NAME_BLANK = "actual_playing_track_is_null_so_not_playing_any_track"
 
 const val LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM = "intent_extra_defines_if_service_is_started_from_alarm"
+const val MAIN_FOREGROUND_SERVICE_CHANNEL_ID = "timer_and_music_player_foreground_service_channel"
