@@ -131,6 +131,7 @@ class TimerAndPlayerService: LifecycleService() {
                 "Playing music",
                 NotificationManager.IMPORTANCE_LOW
             )
+            serviceChannel.setShowBadge(false)
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(serviceChannel)
         }
