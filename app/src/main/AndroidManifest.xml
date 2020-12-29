@@ -29,6 +29,10 @@
         <service android:name=".services.DeleteThemeService" />
         <service android:name=".services.LoadTracksService" />
         <service android:name=".services.TimerAndPlayerService" />
+
+        <receiver android:name=".mechanisms.MediaButtonsBroadcastReceiver" android:enabled="true"
+            android:exported="false">
+        </receiver>
     </application>
 
 </manifest>

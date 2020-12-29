@@ -61,9 +61,4 @@ class MainActivityViewModel: ViewModel() {
             timerAndPlayerBinder.postValue(null)
         }
     }
-
-    override fun onCleared() {
-//        Log.d(mytag, "onCleared, this - $this")
-        super.onCleared()
-    }
 }

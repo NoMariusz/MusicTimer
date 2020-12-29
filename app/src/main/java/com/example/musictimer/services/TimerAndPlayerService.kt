@@ -10,9 +10,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.Observer
 import com.example.musictimer.*
 import com.example.musictimer.mechanisms.MainTimer
+import com.example.musictimer.mechanisms.MediaButtonsBroadcastReceiver
 import com.example.musictimer.mechanisms.MusicPlayer
 
 
@@ -23,10 +27,7 @@ class TimerAndPlayerService: LifecycleService() {
     val musicPlayer = MusicPlayer()
 
     var isForegroundServiceRunning = false
-
-    init {
-        Log.d(TAG, "init: $this")
-    }
+    private var trackName: String = "Not playing music"
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
@@ -36,7 +37,7 @@ class TimerAndPlayerService: LifecycleService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d(TAG, "onUnbind: ")
-        if (mainTimer.timerStatus == TIMER_NOT_STARTED){
+        if (mainTimer.timerStatus == TIMER_NOT_STARTED){    // stop when not timing
             Log.d(TAG, "onUnbind: stopping self")
             stopSelf()
         }
@@ -44,9 +45,27 @@ class TimerAndPlayerService: LifecycleService() {
     }
 
     override fun onCreate() {
-        Log.d(TAG, "onCreate: $this $mainTimer")
+        Log.d(TAG, "onCreate: $this")
         musicPlayer.preparePlayer(applicationContext, application, this)
         super.onCreate()
+        // to update track name in foreground service notification
+        musicPlayer.actualTrackName.observe(this, Observer {
+            trackName = if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK || it == null){
+                resources.getString(R.string.noneTrackNameLoaded)
+            } else {
+                it
+            }
+
+            if (isForegroundServiceRunning) {
+                startForeground()
+            }
+        })
+        // to update start stop button
+        musicPlayer.playerStatus.observe(this, Observer {
+            if (isForegroundServiceRunning){
+                startForeground()
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -56,17 +75,37 @@ class TimerAndPlayerService: LifecycleService() {
 
     private fun startForeground(){
         Log.d(TAG, "startForeground: $this")
+
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            this,
-            0, notificationIntent, 0
+            this, 0, notificationIntent, 0
         )
         val builder  =
             NotificationCompat.Builder(this, MAIN_FOREGROUND_SERVICE_CHANNEL_ID)
-                .setContentTitle("MusicTimer")
-                .setContentText("Working")
+                .setContentTitle(trackName)
+                .setContentText("Theme: ${musicPlayer.selectedTheme?.name}")
                 .setSmallIcon(R.drawable.ic_mtlogo)
                 .setContentIntent(pendingIntent)
+                .setOnlyAlertOnce(true)
+                .setColor(ContextCompat.getColor(baseContext, R.color.colorAccent))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setStyle(MediaStyle()
+                    .setShowActionsInCompactView(1))
+
+                // Add media control buttons that invoke intents
+                .addAction(R.drawable.ic_baseline_skip_previous_48, "Previous",
+                    buildMediaIntent(MUSIC_PLAYER_PREVIOUS_TRACK)) // #0
+        if (musicPlayer.playerStatus.value == MusicPlayer.PlayerStatuses.PLAYING){
+            builder.addAction(R.drawable.ic_baseline_pause_48, "Pause",
+                buildMediaIntent(MUSIC_PLAYER_STOP_TRACK)) // #1
+        } else {
+            builder.addAction(R.drawable.ic_baseline_play_arrow_48, "Play",
+                buildMediaIntent(MUSIC_PLAYER_START_TRACK)) // #1
+        }
+        builder.addAction(R.drawable.ic_baseline_skip_next_48, "Next",
+            buildMediaIntent(MUSIC_PLAYER_NEXT_TRACK)) // #2
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
@@ -97,10 +136,19 @@ class TimerAndPlayerService: LifecycleService() {
         }
     }
 
+    private fun buildMediaIntent(mediaAction: Int): PendingIntent{
+        // build intent to broadcast receiver who handle buttons events
+        val mediaIntent = Intent(this, MediaButtonsBroadcastReceiver::class.java)
+        mediaIntent.putExtra(MEDIA_BUTTON_ACTION, mediaAction)
+        return PendingIntent.getBroadcast(this, mediaAction, mediaIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
     inner class TimerAndPlayerBinder: Binder(){
         fun getService(): TimerAndPlayerService =  this@TimerAndPlayerService
     }
 
+    // special changed MainTimer to start and stop foreground
     inner class ConnectedMusicTimer: MainTimer(){
         override var timerStatus = TIMER_NOT_STARTED
         set(value){

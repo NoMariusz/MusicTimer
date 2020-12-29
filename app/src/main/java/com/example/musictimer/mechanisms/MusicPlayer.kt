@@ -22,9 +22,16 @@ class MusicPlayer {
     enum class IndexOperations {
         INCREASE, DECREASE
     }
+    enum class PlayerStatuses {
+        NOT_LOADED, NOT_PLAYING, PLAYING, STOPPED
+    }
     private val _actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
     val actualTrackName: LiveData<String?>
         get() = _actualTrackName
+
+    private val _playerStatus: MutableLiveData<PlayerStatuses> = MutableLiveData(PlayerStatuses.NOT_LOADED)
+    val playerStatus: LiveData<PlayerStatuses>  // val to other components can react to player changes
+        get() = _playerStatus
 
 
     private lateinit var musicViewModel: MusicViewModel
@@ -61,10 +68,14 @@ class MusicPlayer {
                     parentContext, Uri.parse(track.value))
                 Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
                 _actualTrackName.postValue(track.name)
+
+//                _playerStatus.postValue(PlayerStatuses.NOT_PLAYING)
             }
         } else {
             mediaPlayer = null
             Log.d(mytag, "loadNewTrack - blank playlist")
+
+            _playerStatus.postValue(PlayerStatuses.NOT_LOADED)
         }
 
         mediaPlayer?.setOnCompletionListener {
@@ -85,6 +96,8 @@ class MusicPlayer {
             mediaPlayer?.release()
             mediaPlayer = null
             _actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
+
+            _playerStatus.postValue(PlayerStatuses.NOT_LOADED)
         }
     }
 
@@ -152,12 +165,17 @@ class MusicPlayer {
     fun playMusic() {
         Log.d(mytag, "playMusic - start")
         mediaPlayer?.start()
+        if (mediaPlayer != null && _playerStatus.value != PlayerStatuses.PLAYING){  // to not post that same value
+            _playerStatus.postValue(PlayerStatuses.PLAYING)
+        }
     }
 
     fun pauseMusic() {
         Log.d(mytag, "pauseMusic - start")
         if (mediaPlayer?.isPlaying == true){  // to prevent from error, when pause not started track
             mediaPlayer?.pause()
+
+            _playerStatus.postValue(PlayerStatuses.STOPPED)
         }
     }
 
@@ -166,6 +184,8 @@ class MusicPlayer {
         mediaPlayer?.release()
         mediaPlayer = null
         _actualTrackName.postValue(ACTUAL_PLAYING_TRACK_NAME_BLANK)
+
+        _playerStatus.postValue(PlayerStatuses.NOT_LOADED)
     }
 
     fun nextSong() {

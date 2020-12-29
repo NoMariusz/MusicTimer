@@ -21,7 +21,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.musictimer.data.MusicTheme
 import com.example.musictimer.data.MusicViewModel
-import com.example.musictimer.mechanisms.MusicPlayer
 import com.example.musictimer.services.DeleteThemeService
 import com.example.musictimer.services.LoadTracksService
 import com.google.android.material.navigation.NavigationView

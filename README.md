@@ -21,4 +21,4 @@ App set alarm that start LoadTracksService who synchronize music from device to 
 Works at this project started about half of may 2020
 
 ## TODO
-* make something like foreground servie with music player
+* refactor services code

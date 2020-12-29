@@ -78,10 +78,10 @@ class HomeFragment : Fragment() {
                 })
                 // observer to update actualTackTV
                 musicPlayer?.actualTrackName?.observe(viewLifecycleOwner, Observer { data ->
-                    data?.let {
+                    data?.let { trackName ->
                         Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
-                        var newTrackName: String = it
-                        if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
+                        var newTrackName: String = trackName
+                        if (trackName == ACTUAL_PLAYING_TRACK_NAME_BLANK) {
                             newTrackName = resources.getString(R.string.noneTrackNameLoaded)
                             stopMusic()
                         }
@@ -89,17 +89,25 @@ class HomeFragment : Fragment() {
                         makeAfterDelay({ refreshSlidingAnimation() }, 50)
                     }
                 })
+
+                musicPlayer?.playerStatus?.observe(viewLifecycleOwner, Observer { status ->
+                    if (status == MusicPlayer.PlayerStatuses.PLAYING){
+                        modifyUiAtStartMusic()
+                    } else {
+                        modifyUiAtStopMusic()
+                    }
+                })
             }
         })
 
         val intent = Intent(activity, TimerAndPlayerService::class.java)
-        activity?.applicationContext?.startService(intent)
-        activity?.applicationContext?.bindService(intent, mainActivityViewModel.timerAndPlayerServiceConnection, 0)
+        context?.startService(intent)
+        context?.bindService(intent, mainActivityViewModel.timerAndPlayerServiceConnection, 0)
     }
 
     override fun onDestroyView() {
         Log.d(mytag, "onDestroyView TimerAndPlayerService unbinding: ")
-        activity?.applicationContext?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
+        context?.unbindService(mainActivityViewModel.timerAndPlayerServiceConnection)
         super.onDestroyView()
     }
 
@@ -107,11 +115,9 @@ class HomeFragment : Fragment() {
         Log.d(mytag, "loadTimerStatus - status ${mainTimer?.timerStatus}")
         if (mainTimer?.timerStatus == TIMER_RUNNING) {
             modifyUiAtStart()
-            modifyUiAtStartMusic()
             activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         if (mainTimer?.timerStatus == TIMER_STOPPED) {
-            modifyUiAtStopMusic()
             modifyUiAtStop()
         }
     }
@@ -182,7 +188,6 @@ class HomeFragment : Fragment() {
         mainTimer?.pauseTimer()
 
         mainTimer?.resetTime()
-//        mainTimer?.loadTimeToUi()
 
         modifyUiAtReset()
         stopMusic()
@@ -222,19 +227,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun stopMusic(){
-        modifyUiAtStopMusic()
         musicPlayer?.pauseMusic()
+    }
+
+    private  fun startMusicClick() = onlyAtTimerRunningDec(true) {
+        musicPlayer?.playMusic()
     }
 
     private fun modifyUiAtStopMusic(){
         val startStopTrackIV: ImageView? = view?.findViewById(R.id.startStopTrackIV)
         startStopTrackIV?.setImageResource(R.drawable.ic_baseline_play_arrow_48)
         startStopTrackIV?.setOnClickListener { startMusicClick() }
-    }
-
-    private  fun startMusicClick() = onlyAtTimerRunningDec(true) {
-        modifyUiAtStartMusic()
-        musicPlayer?.playMusic()
     }
 
     private fun modifyUiAtStartMusic(){
