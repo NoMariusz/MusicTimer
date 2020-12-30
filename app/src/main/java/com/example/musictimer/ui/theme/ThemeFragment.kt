@@ -24,7 +24,8 @@ class ThemeFragment : Fragment() {
         this.context?.let {
             ThemesRecyclerAdapter(it,
                 musicViewModel.allThemes.value?.toTypedArray() ?: arrayOf(),
-                MusicTheme(SELECTED_THEME_ID_NOT_SET, "Error", loop = false, random = false, isUpdating = false, isSelfDeleting =  false),
+                MusicTheme(SELECTED_THEME_ID_NOT_SET, "Error", loop = false, random = false,
+                    isUpdating = false, isSelfDeleting = false),
                 musicViewModel)
         }
     }
@@ -109,8 +110,11 @@ class ThemeFragment : Fragment() {
     }
 
     private fun addNewTheme(){
-        // add new theme to base and set addingNewThemeStart to load editheme after add this theme
-        val theme = MusicTheme(0, "New theme", loop = false, random = false, isUpdating = false, isSelfDeleting =  false)
+        // add new theme to base and set addingNewThemeStart to load edit theme after add this theme
+        val theme = MusicTheme(
+            0, "New theme", loop = false, random = false, isUpdating = false,
+            isSelfDeleting = false
+        )
         musicViewModel.addThemeWithNoneTracks(
             theme)
         addingNewThemeStart = true

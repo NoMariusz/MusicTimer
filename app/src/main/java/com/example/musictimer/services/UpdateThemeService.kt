@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.concurrent.schedule
 
 class UpdateThemeService: Service() {
     val mytag = "UpdateThemeService"

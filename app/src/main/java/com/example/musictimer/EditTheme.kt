@@ -1,13 +1,8 @@
 package com.example.musictimer
 
 import android.app.Activity
-import android.app.Service
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -36,8 +31,7 @@ class EditTheme : AppCompatActivity() {
     private val tracksViewManager by lazy {
         LinearLayoutManager(this)
     }
-    private var themePosition =
-        SELECTED_THEME_ID_NOT_SET
+    private var themePosition = SELECTED_THEME_ID_NOT_SET
     private lateinit var tracksAdapter: TracksRecycleAdapter
 
     private var tracksBaseLoaded = false
@@ -47,18 +41,11 @@ class EditTheme : AppCompatActivity() {
     private lateinit var musicViewModel: MusicViewModel
 
     private lateinit var editThemeViewModel: EditThemeViewModel
-    private var updateThemeService: UpdateThemeService? = null
-
-    private lateinit var updateThemeServiceConnectionManager: ServiceConnectionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(mytag, "onCreate - this $this")
         setContentView(R.layout.activity_edit_theme)
-
-        updateThemeServiceConnectionManager = ServiceConnectionManager(context = applicationContext,
-            service = UpdateThemeService::class.java
-        )
 
         actionBar?.title = "Edit theme"
         supportActionBar?.title = "Edit theme"
@@ -96,20 +83,18 @@ class EditTheme : AppCompatActivity() {
         //to update theme with service
         editThemeViewModel = ViewModelProvider(this).get(EditThemeViewModel::class.java)
 
-        updateThemeServiceConnectionManager.unbindFromService()     // test it work without this
-
         editThemeViewModel.updateThemeBinder.observe(this, Observer{
             if (it != null){
-                updateThemeService = it.getService()
+                val updateThemeService = it.getService()
                 Log.d(mytag, "editThemeViewModel.UpdateThemeBinder, get service $updateThemeService")
                 if (editThemeViewModel.tempThemeToSave != null && editThemeViewModel.tracksToSave != null){
                     Log.d(mytag, "editThemeViewModel.UpdateThemeBinder, updatingTheme")
-                    updateThemeService?.updateThemeTracksAndTheme(this, themePosition,
+                    updateThemeService.updateThemeTracksAndTheme(this, themePosition,
                         editThemeViewModel.tempThemeToSave!!, editThemeViewModel.tracksToSave!!)
                     editThemeViewModel.tempThemeToSave = null
                     editThemeViewModel.tracksToSave = null
                 }
-                updateThemeServiceConnectionManager.unbindFromService()
+                unbindService(editThemeViewModel.updateThemeServiceConnection)
             }
         })
 
@@ -120,7 +105,7 @@ class EditTheme : AppCompatActivity() {
         super.onPause()
         Log.d(mytag, "onPause() - this $this")
         if (themePosition != SELECTED_THEME_ID_NOT_SET){
-            prepareToUpdateThemeAndReferences()
+            startUpdateThemeAndReferences()
         }
     }
 
@@ -159,7 +144,6 @@ class EditTheme : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 //        Log.d(mytag, "onDestroy() - this $this")
-        updateThemeServiceConnectionManager.unbindFromService()
     }
 
 
@@ -197,7 +181,7 @@ class EditTheme : AppCompatActivity() {
         tracksRecyclerView.adapter = tracksAdapter
     }
 
-    private fun prepareToUpdateThemeAndReferences(){
+    private fun startUpdateThemeAndReferences(){
         Log.d(mytag, "prepareToUpdateThemeAndReferences(), this $this")
         editThemeViewModel.tempThemeToSave = MusicTheme(SELECTED_THEME_ID_NOT_SET,
             findViewById<TextView>(R.id.themeNameMT).text.toString(),
@@ -207,7 +191,10 @@ class EditTheme : AppCompatActivity() {
             isSelfDeleting = false
         )
         editThemeViewModel.tracksToSave = tracksAdapter.trackList
-        updateThemeServiceConnectionManager.bindToService()
+
+        val intent = Intent(this, UpdateThemeService::class.java)
+        startService(intent)
+        bindService(intent, editThemeViewModel.updateThemeServiceConnection, 0)
 
         Log.d(mytag, "saveTracksFromRecyclerView() - end, service start binding")
     }
@@ -252,52 +239,5 @@ class EditTheme : AppCompatActivity() {
         intent.putExtra(THEME_TO_DELETE_ID, themePosition.toInt())
         startService(intent)
         Log.d(mytag, "startDeletingThemeService() - end")
-    }
-
-    inner class ServiceConnectionManager(private val context: Context,
-                                         private val service: Class<out Service?>)
-        : ServiceConnection {
-        // connection manager to manage connection of services to avoid errors on binding and
-        // unbinding service
-        private var attemptingToBind = false
-        private var bound = false
-
-        val mytag = "ServiceConnectionManage"
-
-        override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
-            Log.d(mytag, "onServiceConnected() - start")
-            attemptingToBind = false
-            bound = true
-            val binder: UpdateThemeService.UpdateThemeBinder? = iBinder as UpdateThemeService.UpdateThemeBinder?
-            editThemeViewModel.updateThemeBinder.postValue(binder)
-        }
-
-        override fun onServiceDisconnected(componentName: ComponentName) {
-            Log.d(mytag, "onServiceDisconnected() - start")
-            bound = false
-            editThemeViewModel.updateThemeBinder.postValue(null)
-        }
-
-        fun bindToService() {
-            Log.d(mytag, "bindToService() - start")
-            if (!attemptingToBind) {
-                attemptingToBind = true
-                val intent = Intent(context, service)
-                startService(intent)
-                context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-                Log.d(mytag, "bindToService() - binding")
-            }
-        }
-
-        fun unbindFromService() {
-            Log.d(mytag, "unbindFromService() - start, bound $bound")
-            attemptingToBind = false
-            if (bound) {
-                context.unbindService(this)
-                Log.d(mytag, "unbindFromService() - UNBINDING")
-                bound = false
-                editThemeViewModel.updateThemeBinder.postValue(null)
-            }
-        }
     }
 }

@@ -19,9 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.musictimer.data.MusicTheme
 import com.example.musictimer.data.MusicViewModel
-import com.example.musictimer.services.DeleteThemeService
 import com.example.musictimer.services.LoadTracksService
 import com.google.android.material.navigation.NavigationView
 
@@ -42,22 +40,18 @@ class MainActivity : AppCompatActivity() {
 
         musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-        // observer is necessary to force open database and populate it, and make clean in base
-        // after errors made by killing app when base services work, cleaning only once at open app
+        // observer to force open database and populate it, and make clean not updated themes
         musicViewModel.allThemes.observe(this, Observer { themes ->
             themes?.let {
-                Log.d(mytag, "musicViewModel.allThemes.observe - themes: $themes, isCleaningBaseMade: ${mainActivityViewModel.isCleaningBaseMade}")
-                if(!mainActivityViewModel.isCleaningBaseMade) {
+//                Log.d(mytag, "allThemes.observe - themes: $themes")
+                if (!mainActivityViewModel.isCleaningBaseMade) {
+//                    Log.d(mytag, "onCreate: allThemes.observe: making cleaning base")
                     mainActivityViewModel.isCleaningBaseMade = true
                     for (theme in it) {
                         if (theme.isUpdating) {
-                            Log.d(mytag, "In base are not updated themes, themes: $it")
+                            Log.w(mytag, "In base is not updated theme, theme: $theme")
                             theme.isUpdating = false
                             musicViewModel.updateTheme(theme)
-                        }
-                        if (theme.isSelfDeleting) {
-                            Log.d(mytag, "In base are not deleted themes, themes: $it")
-                            startDeletingThemeService(theme.themeId)
                         }
                     }
                 }
@@ -98,17 +92,13 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun startDeletingThemeService(themeId: Long){
-        val intent = Intent(this, DeleteThemeService::class.java)
-        intent.putExtra(THEME_TO_DELETE_ID, themeId.toInt())
-        startService(intent)
-        Log.d(mytag, "startDeletingThemeService() - end")
-    }
-
     private fun startUpdatingTracksService() {  // set alarm that fires service to update tracks
         Log.d(mytag, "startUpdatingTracksService: start")
-        val alarmMgr: AlarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent: PendingIntent = Intent(applicationContext, LoadTracksService::class.java).let { intent ->
+        val alarmMgr: AlarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent: PendingIntent = Intent(
+            applicationContext, LoadTracksService::class.java
+        ).let { intent ->
             intent.putExtra(LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM, true)
             PendingIntent.getService(applicationContext, 0, intent, 0)
         }

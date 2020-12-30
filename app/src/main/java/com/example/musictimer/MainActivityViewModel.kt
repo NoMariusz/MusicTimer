@@ -6,7 +6,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.musictimer.services.DeleteThemeService
 import com.example.musictimer.services.LoadTracksService
 import com.example.musictimer.services.TimerAndPlayerService
 

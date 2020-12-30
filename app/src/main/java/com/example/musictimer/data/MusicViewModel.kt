@@ -89,7 +89,10 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
                 return theme
             }
         }
-        return MusicTheme(-1, "Non-exist theme", loop = false, random = false, isUpdating = false, isSelfDeleting =  false)
+        return MusicTheme(
+            -1, "Non-exist theme", loop = false, random = false, isUpdating = false,
+            isSelfDeleting = false
+        )
     }
 
     private fun getFirstTheme(): MusicTheme {
@@ -174,12 +177,10 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
     suspend fun suspendDeleteTheme(themeId: Long) {
         Log.d(TAG, "suspendDeleteTheme() - themeId: $themeId")
         val theme = getThemeById(themeId)
-        theme.isSelfDeleting = true
-        repository.updateTheme(theme)
-        if (getMainInfoEntity().selectedThemeId == theme.themeId){
+        if (getMainInfoEntity().selectedThemeId == themeId){
             setSelectedThemeById(getFirstTheme().themeId)
         }
-        repository.deleteAllThemeTracks(theme.themeId)
+        repository.deleteAllThemeTracks(themeId)
         repository.deleteTheme(theme)
         Log.d(TAG, "suspendDeleteTheme() - end deleting theme")
     }

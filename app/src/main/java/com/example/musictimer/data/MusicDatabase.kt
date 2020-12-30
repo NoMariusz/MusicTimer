@@ -33,7 +33,7 @@ abstract class MusicDatabase: RoomDatabase() {
             }
         }
     }
-
+    
     private class MusicDatabaseCallback(private val scope: CoroutineScope) :
         RoomDatabase.Callback() {
         val mytag = "MusicDatabaseCallback"
@@ -56,7 +56,10 @@ abstract class MusicDatabase: RoomDatabase() {
         }
 
         suspend fun initThemes(musicDao: MusicDao) {
-            musicDao.addTheme(MusicTheme(0, "Quiet", loop = false, random = false, isUpdating = false, isSelfDeleting =  false))
+            musicDao.addTheme(MusicTheme(
+                0, "Quiet", loop = false, random = false, isUpdating = false,
+                isSelfDeleting = false
+            ))
         }
 
         suspend fun initSelectedTheme(musicDao: MusicDao) {
