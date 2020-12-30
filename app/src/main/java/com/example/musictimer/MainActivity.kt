@@ -32,8 +32,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var musicViewModel: MusicViewModel
 
-    private var deleteThemeService: DeleteThemeService? = null
-    private var themeToDelete: MusicTheme? = null
     private lateinit var mainActivityViewModel: MainActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-        // observer is necessary to force open database and populate it, but his work is clean base
+        // observer is necessary to force open database and populate it, and make clean in base
         // after errors made by killing app when base services work, cleaning only once at open app
         musicViewModel.allThemes.observe(this, Observer { themes ->
             themes?.let {
@@ -59,20 +57,10 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (theme.isSelfDeleting) {
                             Log.d(mytag, "In base are not deleted themes, themes: $it")
-                            themeToDelete = theme
-                            startDeletingThemeService()
+                            startDeletingThemeService(theme.themeId)
                         }
                     }
                 }
-            }
-        })
-        //to delete theme as service and finish
-        mainActivityViewModel.deleteThemeBinder.observe(this, Observer{
-            if (it != null){
-                deleteThemeService = it.getService()
-                Log.d(mytag, "editThemeViewModel.deleteThemeBinder, get service $deleteThemeService, themeToDelete $themeToDelete")
-                themeToDelete?.let { it1 -> deleteThemeService?.startDeletingTheme(it1, this) }
-                unbindService(mainActivityViewModel.deleteThemeServiceConnection)
             }
         })
 
@@ -110,11 +98,11 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun startDeletingThemeService(){
+    private fun startDeletingThemeService(themeId: Long){
         val intent = Intent(this, DeleteThemeService::class.java)
+        intent.putExtra(THEME_TO_DELETE_ID, themeId.toInt())
         startService(intent)
-        bindService(intent, mainActivityViewModel.deleteThemeServiceConnection, Context.BIND_AUTO_CREATE)
-        Log.d(mytag, "startDeletingThemeService() - end, service start binding")
+        Log.d(mytag, "startDeletingThemeService() - end")
     }
 
     private fun startUpdatingTracksService() {  // set alarm that fires service to update tracks

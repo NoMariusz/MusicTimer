@@ -87,7 +87,7 @@ class TimerAndPlayerService: LifecycleService() {
                 .setSmallIcon(R.drawable.ic_mtlogo)
                 .setContentIntent(pendingIntent)
                 .setOnlyAlertOnce(true)
-                .setColor(ContextCompat.getColor(baseContext, R.color.colorAccent))
+                .setColor(ContextCompat.getColor(baseContext, R.color.colorPrimaryDark))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setStyle(MediaStyle()

@@ -65,13 +65,8 @@ class UpdateThemeService: Service() {
             Log.d(mytag, "updateThemeTracksAndStop(), theme: $themeId")
             musicViewModel.suspendUpdateThemeAndHisTracks(themeId, tempTheme, tracks)
             Log.d(mytag, "updateThemeTracks() - end updating tracks in viewModel, stopping self")
-            killSelf()
+            stopSelf()
         }
-
-    private fun killSelf(){
-        Log.d(mytag, "killSelf() - killing self this $this")
-        stopSelf()
-    }
 
     inner class UpdateThemeBinder : Binder(){
         fun getService() : UpdateThemeService = this@UpdateThemeService

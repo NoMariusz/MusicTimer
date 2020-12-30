@@ -49,9 +49,6 @@ class EditTheme : AppCompatActivity() {
     private lateinit var editThemeViewModel: EditThemeViewModel
     private var updateThemeService: UpdateThemeService? = null
 
-    private var deleteThemeService: DeleteThemeService? = null
-    private var themeToDelete: MusicTheme? = null
-
     private lateinit var updateThemeServiceConnectionManager: ServiceConnectionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,18 +110,6 @@ class EditTheme : AppCompatActivity() {
                     editThemeViewModel.tracksToSave = null
                 }
                 updateThemeServiceConnectionManager.unbindFromService()
-            }
-        })
-
-        //to delete theme as service and finish
-        editThemeViewModel.deleteThemeBinder.observe(this, Observer{
-            Log.d(mytag, "editThemeViewModel.deleteThemeBinder data: $it")
-            if (it != null){
-                deleteThemeService = it.getService()
-                Log.d(mytag, "editThemeViewModel.deleteThemeBinder, get service $deleteThemeService, themeToDelete $themeToDelete")
-                themeToDelete?.let { it1 -> deleteThemeService?.startDeletingTheme(it1, this) }
-                unbindService(editThemeViewModel.deleteThemeServiceConnection)
-                finish()
             }
         })
 
@@ -256,18 +241,17 @@ class EditTheme : AppCompatActivity() {
     }
 
     private fun deleteActualTheme() {
-        themeToDelete = musicViewModel.getThemeById(themePosition)
-        Log.d(mytag, "deleteActualTheme - start, theme name = $themeToDelete")
+        Log.d(mytag, "deleteActualTheme - start, theme id = $themePosition")
         startDeletingThemeService()
-
         themePosition = SELECTED_THEME_ID_NOT_SET
+        finish()
     }
 
     private fun startDeletingThemeService(){
         val intent = Intent(this, DeleteThemeService::class.java)
+        intent.putExtra(THEME_TO_DELETE_ID, themePosition.toInt())
         startService(intent)
-        bindService(intent, editThemeViewModel.deleteThemeServiceConnection, Context.BIND_AUTO_CREATE)
-        Log.d(mytag, "startDeletingThemeService() - end, service start binding")
+        Log.d(mytag, "startDeletingThemeService() - end")
     }
 
     inner class ServiceConnectionManager(private val context: Context,
@@ -299,7 +283,7 @@ class EditTheme : AppCompatActivity() {
             if (!attemptingToBind) {
                 attemptingToBind = true
                 val intent = Intent(context, service)
-//                startService(intent)
+                startService(intent)
                 context.bindService(intent, this, Context.BIND_AUTO_CREATE)
                 Log.d(mytag, "bindToService() - binding")
             }

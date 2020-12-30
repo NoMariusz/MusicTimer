@@ -171,8 +171,9 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
         repository.addTheme(theme)
     }
 
-    suspend fun suspendDeleteTheme(theme: MusicTheme) {
-        Log.d(TAG, "suspendDeleteTheme() - theme: $theme")
+    suspend fun suspendDeleteTheme(themeId: Long) {
+        Log.d(TAG, "suspendDeleteTheme() - themeId: $themeId")
+        val theme = getThemeById(themeId)
         theme.isSelfDeleting = true
         repository.updateTheme(theme)
         if (getMainInfoEntity().selectedThemeId == theme.themeId){

@@ -25,3 +25,5 @@ const val MUSIC_PLAYER_PREVIOUS_TRACK = 501
 const val MUSIC_PLAYER_STOP_TRACK = 502
 const val MUSIC_PLAYER_START_TRACK = 503
 const val MUSIC_PLAYER_NEXT_TRACK = 504
+
+const val THEME_TO_DELETE_ID = "intent_extra_name_to_delete_theme_service"
