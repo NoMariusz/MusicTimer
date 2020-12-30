@@ -90,8 +90,7 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
             }
         }
         return MusicTheme(
-            -1, "Non-exist theme", loop = false, random = false, isUpdating = false,
-            isSelfDeleting = false
+            -1, "Non-exist theme", loop = false, random = false, isUpdating = false
         )
     }
 

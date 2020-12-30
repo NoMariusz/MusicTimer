@@ -26,12 +26,6 @@ class ThemesRecyclerAdapter(private val context: Context, private var themesList
     private val mytag = "ThemesRecyclerAdapter"
     private val layoutInflater = LayoutInflater.from(context)
 
-    init {
-        // to be sure, that actual deleting themes can not be visible at adapter
-        themesList = themesList.filter {
-            ! it.isSelfDeleting
-        }.toTypedArray()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val itemView = layoutInflater.inflate(R.layout.theme_card_list, parent, false)
@@ -88,9 +82,7 @@ class ThemesRecyclerAdapter(private val context: Context, private var themesList
     }
 
     fun setThemes(gThemesList: Array<MusicTheme>){
-        themesList = gThemesList.filter {
-            ! it.isSelfDeleting
-        }.toTypedArray()
+        themesList = gThemesList
     }
 
     fun setSelectedTheme(theme: MusicTheme){

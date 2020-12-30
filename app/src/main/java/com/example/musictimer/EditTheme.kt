@@ -141,12 +141,6 @@ class EditTheme : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-//        Log.d(mytag, "onDestroy() - this $this")
-    }
-
-
     private fun loadThemeToUI(){
         val theme = musicViewModel.getThemeById(themePosition)
 
@@ -187,8 +181,7 @@ class EditTheme : AppCompatActivity() {
             findViewById<TextView>(R.id.themeNameMT).text.toString(),
             findViewById<Switch>(R.id.loopSwitch).isChecked,
             findViewById<Switch>(R.id.randomSwitch).isChecked,
-            isUpdating = false,
-            isSelfDeleting = false
+            isUpdating = false
         )
         editThemeViewModel.tracksToSave = tracksAdapter.trackList
 
