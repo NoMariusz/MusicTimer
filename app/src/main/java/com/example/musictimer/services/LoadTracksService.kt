@@ -57,7 +57,9 @@ class LoadTracksService: LifecycleService() {
         if (checkPermissions()){    // if has permissions then update tracks
             startUpdatingTracks()
         } else {    // if has not permissions then request it and check again
-            parent?.requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+            parent?.requestPermissions(arrayOf(
+                android.Manifest.permission.READ_EXTERNAL_STORAGE), 1
+            )
             if (checkPermissions()) {
                 startUpdatingTracks()
             } else {

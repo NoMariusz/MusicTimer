@@ -96,19 +96,31 @@ class MainActivity : AppCompatActivity() {
         Log.d(mytag, "startUpdatingTracksService: start")
         val alarmMgr: AlarmManager =
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent: PendingIntent = Intent(
+        val baseIntent: Intent = Intent(
             applicationContext, LoadTracksService::class.java
-        ).let { intent ->
-            intent.putExtra(LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM, true)
-            PendingIntent.getService(applicationContext, 0, intent, 0)
-        }
+        ).putExtra(LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM, true)
 
-//        alarmMgr.cancel(alarmIntent)  // cancel to override existing alarm
-        alarmMgr.setInexactRepeating(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime(),
-            DateUtils.WEEK_IN_MILLIS,
-            alarmIntent
-        )
+        val isAlarmAlreadySet = PendingIntent.getService(applicationContext, 0,
+            baseIntent, PendingIntent.FLAG_NO_CREATE) != null
+        Log.d(mytag, "startUpdatingTracksService: isAlarmAlreadySet: $isAlarmAlreadySet")
+
+        val alarmIntent = PendingIntent.getService(applicationContext, 0, baseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT)
+
+        if (! isAlarmAlreadySet){
+            // update tracks now
+            requestPermissions(
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1
+            )
+            startService(baseIntent)
+
+            // set updating tracks alarm
+            alarmMgr.setInexactRepeating(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + DateUtils.WEEK_IN_MILLIS,
+                DateUtils.WEEK_IN_MILLIS,
+                alarmIntent
+            )
+        }
     }
 }

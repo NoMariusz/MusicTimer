@@ -187,6 +187,7 @@ class MusicViewModel(application: Application): AndroidViewModel(application) {
     // special function for updating tracks in LoadTracksService
     suspend fun updateTracks(tracks: List<Track>, parent: TracksFragment?) {
         Log.d(TAG, "updateTracks() - start")
+        parent?.modifyUiAtStartUpdate()
         parent?.prepareProgressBar(tracks.size)
         // deleting all tracks in base without names or values in actual device music scan list
         val namesList = tracks.map { track -> track.name }

@@ -84,9 +84,17 @@ class TracksFragment : Fragment() {
         }
     }
 
+    fun modifyUiAtStartUpdate(){
+        val updateBtn = activity?.findViewById<Button>(R.id.updateButton)
+        val progressLay = activity?.findViewById<ConstraintLayout>(R.id.loadingLayout)
+        activity?.runOnUiThread {
+            updateBtn?.visibility = View.GONE
+            progressLay?.visibility = View.VISIBLE
+        }
+    }
+
     private fun updateBtnClicked() {
         Log.d(mytag, "updateBtnClicked() - start")
-        modifyUiAtStartUpdate()
         // start loadTracksService
         val intent = Intent(activity, LoadTracksService::class.java)
         activity?.startService(intent)
@@ -97,14 +105,6 @@ class TracksFragment : Fragment() {
     private fun loadTracksAmountToUi(amount: Int){
         val trackNumberTV = activity?.findViewById<TextView>(R.id.tracksCountTV)
         trackNumberTV?.text = amount.toString()
-    }
-
-    private fun modifyUiAtStartUpdate(){
-        val updateBtn = activity?.findViewById<Button>(R.id.updateButton)
-        updateBtn?.visibility = View.GONE
-
-        val progressLay = activity?.findViewById<ConstraintLayout>(R.id.loadingLayout)
-        progressLay?.visibility = View.VISIBLE
     }
 
 }
