@@ -30,11 +30,11 @@ abstract class MusicDatabase: RoomDatabase() {
                 // Copy the data
                 database.execSQL(
                     "INSERT INTO themes_new (themeId, name, loop, random, isUpdating) " +
-                            "SELECT themeId, name, loop, random, isUpdating FROM themes");
+                            "SELECT themeId, name, loop, random, isUpdating FROM themes")
                 // Remove the old table
-                database.execSQL("DROP TABLE themes");
+                database.execSQL("DROP TABLE themes")
                 // Change the table name to the correct one
-                database.execSQL("ALTER TABLE themes_new RENAME TO themes");
+                database.execSQL("ALTER TABLE themes_new RENAME TO themes")
             }
         }
 

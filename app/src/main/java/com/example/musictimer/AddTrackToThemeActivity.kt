@@ -11,7 +11,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.TextView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +43,7 @@ class AddTrackToThemeActivity : AppCompatActivity() {
         musicViewModel.setNeededBlankDataObservers(this,
             listOf(musicViewModel.allThemes, musicViewModel.allThemesTracksReferences))
         // update all tracks adapter when viewmodel tracks live data are loaded
-        musicViewModel.allTracks.observe(this, Observer { themes ->
+        musicViewModel.allTracks.observe(this, { themes ->
             themes?.let {
                 val tracks = musicViewModel.allTracks.value
                 if (tracks != null){

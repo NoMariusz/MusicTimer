@@ -12,7 +12,6 @@ import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -41,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         // observer to force open database and populate it, and make clean not updated themes
-        musicViewModel.allThemes.observe(this, Observer { themes ->
+        musicViewModel.allThemes.observe(this, { themes ->
             themes?.let {
 //                Log.d(mytag, "allThemes.observe - themes: $themes")
                 if (!mainActivityViewModel.isCleaningBaseMade) {

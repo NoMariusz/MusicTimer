@@ -3,7 +3,6 @@ package com.example.musictimer.services
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.Observer
 import com.example.musictimer.THEME_TO_DELETE_ID
 import com.example.musictimer.data.*
 import kotlinx.coroutines.Dispatchers
@@ -35,15 +34,15 @@ class DeleteThemeService : LifecycleService() {
     private fun startDeletingTheme(themeId: Int?){
         // making observers to needed musicViewModel liveData, and start deleting when all data are
         // loaded
-        musicViewModel.allThemes.observe(this, Observer {
+        musicViewModel.allThemes.observe(this, {
             allThemesLoaded = true
             if (checkAllNecessaryLiveDataLoaded()) deleteTheme(themeId)
         })
-        musicViewModel.allThemesTracksReferences.observe(this, Observer {
+        musicViewModel.allThemesTracksReferences.observe(this, {
             allThemeTracksRefLoaded = true
             if (checkAllNecessaryLiveDataLoaded()) deleteTheme(themeId)
         })
-        musicViewModel.selectedThemeInformationEntities.observe(this, Observer {
+        musicViewModel.selectedThemeInformationEntities.observe(this, {
             selectedThemeInfoLoaded = true
             if (checkAllNecessaryLiveDataLoaded()) deleteTheme(themeId)
         })

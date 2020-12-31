@@ -12,7 +12,6 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,19 +59,19 @@ class EditTheme : AppCompatActivity() {
         musicViewModel.setNeededBlankDataObservers(this,
             listOf(musicViewModel.selectedThemeInformationEntities))
         // observers are set to update ui when livedata from viewmodel are loaded
-        musicViewModel.allThemesTracksReferences.observe(this, Observer { themes ->
+        musicViewModel.allThemesTracksReferences.observe(this, { themes ->
             themes?.let {
                 themeTracksReferenceBaseLoaded = true
                 updateThemeTracksOnAdapter()
             }
         })
-        musicViewModel.allTracks.observe(this, Observer { themes ->
+        musicViewModel.allTracks.observe(this, { themes ->
             themes?.let {
                 tracksBaseLoaded = true
                 updateThemeTracksOnAdapter()
             }
         })
-        musicViewModel.allThemes.observe(this, Observer { themes ->
+        musicViewModel.allThemes.observe(this, { themes ->
             themes?.let {
                 themesBaseLoaded = true
                 loadThemeToUI()
@@ -83,7 +82,7 @@ class EditTheme : AppCompatActivity() {
         //to update theme with service
         editThemeViewModel = ViewModelProvider(this).get(EditThemeViewModel::class.java)
 
-        editThemeViewModel.updateThemeBinder.observe(this, Observer{
+        editThemeViewModel.updateThemeBinder.observe(this, {
             if (it != null){
                 val updateThemeService = it.getService()
                 Log.d(mytag, "editThemeViewModel.UpdateThemeBinder, get service $updateThemeService")

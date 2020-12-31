@@ -11,7 +11,6 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.Observer
 import com.example.musictimer.LOAD_TRACKS_SERVICE_STARTED_FROM_ALARM
 import com.example.musictimer.data.MusicViewModel
 import com.example.musictimer.data.Track
@@ -81,11 +80,11 @@ class LoadTracksService: LifecycleService() {
 
     private fun startUpdatingTracks(){
         // loading data in musicViewModel
-        musicViewModel.allTracks.observe(this, Observer {
+        musicViewModel.allTracks.observe(this, {
             if (it != null){ dataToUpdateLoaded() }
         })
 
-        musicViewModel.allThemesTracksReferences.observe(this, Observer {
+        musicViewModel.allThemesTracksReferences.observe(this, {
             if (it != null){ dataToUpdateLoaded() }
         })
         

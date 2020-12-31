@@ -51,7 +51,7 @@ class ThemeFragment : Fragment() {
         setHasOptionsMenu(true)
 
         musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
-        musicViewModel.allThemes.observe(this, Observer { themes ->
+        musicViewModel.allThemes.observe(this, { themes ->
             themes?.let {
                 themesLoaded = true
                 Log.d(mytag, " musicViewModel.allThemes.observe - themesRecycleAdapter?.setThemes(it.toTypedArray()) - start themes: $it")
@@ -66,7 +66,7 @@ class ThemeFragment : Fragment() {
                 }
             }
         })
-        musicViewModel.selectedThemeInformationEntities.observe(this, Observer { themes ->
+        musicViewModel.selectedThemeInformationEntities.observe(this, { themes ->
             themes?.let {
                 informationEntitiesLoaded = true
                 if (informationEntitiesLoaded and themesLoaded){

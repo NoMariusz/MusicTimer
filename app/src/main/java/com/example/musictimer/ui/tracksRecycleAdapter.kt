@@ -64,6 +64,7 @@ class TracksRecycleAdapter(context: Context, var trackList: ArrayList<Track>)
         }
 
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            v?.performClick()
             gestureDetector.onTouchEvent(event)
             return true
         }

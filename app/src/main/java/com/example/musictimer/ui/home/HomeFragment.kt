@@ -3,7 +3,6 @@ package com.example.musictimer.ui.home
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,12 +15,13 @@ import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.musictimer.*
 import com.example.musictimer.mechanisms.MainTimer
 import com.example.musictimer.mechanisms.MusicPlayer
 import com.example.musictimer.services.TimerAndPlayerService
+import java.util.*
+import kotlin.concurrent.schedule
 
 
 class HomeFragment : Fragment() {
@@ -66,18 +66,18 @@ class HomeFragment : Fragment() {
     
         // start time and player service
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-        mainActivityViewModel.timerAndPlayerBinder.observe(viewLifecycleOwner, Observer {
+        mainActivityViewModel.timerAndPlayerBinder.observe(viewLifecycleOwner, {
             if (it != null) {
                 Log.d(mytag, "onActivityCreated: timerAndPlayerBinder get service ${it.getService()}")
                 val timerAndPlayerService = it.getService()
                 mainTimer = timerAndPlayerService.mainTimer
                 musicPlayer = timerAndPlayerService.musicPlayer
                 loadTimerStatus()
-                mainTimer?.time?.observe(viewLifecycleOwner, Observer { time ->
+                mainTimer?.time?.observe(viewLifecycleOwner, { time ->
                     loadTimeToUi(time[0], time[1])
                 })
                 // observer to update actualTackTV
-                musicPlayer?.actualTrackName?.observe(viewLifecycleOwner, Observer { data ->
+                musicPlayer?.actualTrackName?.observe(viewLifecycleOwner, { data ->
                     data?.let { trackName ->
                         Log.d(mytag, "onActivityCreated: actualTrackName changed $data")
                         var newTrackName: String = trackName
@@ -90,7 +90,7 @@ class HomeFragment : Fragment() {
                     }
                 })
 
-                musicPlayer?.playerStatus?.observe(viewLifecycleOwner, Observer { status ->
+                musicPlayer?.playerStatus?.observe(viewLifecycleOwner, { status ->
                     if (status == MusicPlayer.PlayerStatuses.PLAYING){
                         modifyUiAtStartMusic()
                     } else {
@@ -159,7 +159,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun makeAfterDelay(func: () -> Unit, delay: Long){
-        Handler().postDelayed(func, delay)
+        Timer().schedule(delay){
+            activity?.runOnUiThread(func)
+        }
     }
 
     // btn and iv events

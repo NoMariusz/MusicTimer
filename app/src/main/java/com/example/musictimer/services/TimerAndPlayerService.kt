@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.Observer
 import com.example.musictimer.*
 import com.example.musictimer.mechanisms.MainTimer
 import com.example.musictimer.mechanisms.MediaButtonsBroadcastReceiver
@@ -49,7 +48,7 @@ class TimerAndPlayerService: LifecycleService() {
         musicPlayer.preparePlayer(applicationContext, application, this)
         super.onCreate()
         // to update track name in foreground service notification
-        musicPlayer.actualTrackName.observe(this, Observer {
+        musicPlayer.actualTrackName.observe(this, {
             trackName = if (it == ACTUAL_PLAYING_TRACK_NAME_BLANK || it == null){
                 resources.getString(R.string.noneTrackNameLoaded)
             } else {
@@ -60,7 +59,7 @@ class TimerAndPlayerService: LifecycleService() {
             }
         })
         // to update start stop button
-        musicPlayer.playerStatus.observe(this, Observer {
+        musicPlayer.playerStatus.observe(this, {
             if (isForegroundServiceRunning){
                 startForeground()
             }

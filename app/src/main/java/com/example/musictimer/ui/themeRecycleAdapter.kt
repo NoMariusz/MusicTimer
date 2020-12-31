@@ -92,11 +92,11 @@ class ThemesRecyclerAdapter(private val context: Context, private var themesList
 
     inner class MyViewHolder(itemView : View, adapter: ThemesRecyclerAdapter)
         : RecyclerView.ViewHolder(itemView){
-        val cardTitleTextView = itemView.findViewById<TextView?>(R.id.cardTitleTextView)
-        val loopImageView = itemView.findViewById<ImageView?>(R.id.loopImageView)
-        val randomImageView = itemView.findViewById<ImageView?>(R.id.randomImageView)
-        val isSelectedCheckButton = itemView.findViewById<CheckBox?>(R.id.checkBox)
-        val isUpdatingTextView = itemView.findViewById<TextView?>(R.id.isUpdatingTextView)
+        val cardTitleTextView: TextView? = itemView.findViewById(R.id.cardTitleTextView)
+        val loopImageView: ImageView? = itemView.findViewById(R.id.loopImageView)
+        val randomImageView: ImageView? = itemView.findViewById(R.id.randomImageView)
+        val isSelectedCheckButton: CheckBox? = itemView.findViewById(R.id.checkBox)
+        val isUpdatingTextView: TextView? = itemView.findViewById(R.id.isUpdatingTextView)
         var themeId: Long = SELECTED_THEME_ID_NOT_SET
 
         init {

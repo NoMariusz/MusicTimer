@@ -12,7 +12,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.musictimer.MainActivityViewModel
 import com.example.musictimer.R
@@ -44,13 +43,13 @@ class TracksFragment : Fragment() {
         }
 
         musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
-        musicViewModel.allTracks.observe(viewLifecycleOwner, Observer { tracks ->
+        musicViewModel.allTracks.observe(viewLifecycleOwner, { tracks ->
             loadTracksAmountToUi(tracks.size)
         })
 
         // to loadTracksService
         mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-        mainActivityViewModel.loadTracksBinder.observe(viewLifecycleOwner, Observer {
+        mainActivityViewModel.loadTracksBinder.observe(viewLifecycleOwner, {
             if (it != null) {
                 val loadTracksService = it.getService()
 //                Log.d(mytag, "onActivityCreated: mainActivityViewModel.loadTracksBinder, get service $loadTracksService")
