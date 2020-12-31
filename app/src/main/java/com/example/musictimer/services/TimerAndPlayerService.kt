@@ -55,7 +55,6 @@ class TimerAndPlayerService: LifecycleService() {
             } else {
                 it
             }
-
             if (isForegroundServiceRunning) {
                 startForeground()
             }

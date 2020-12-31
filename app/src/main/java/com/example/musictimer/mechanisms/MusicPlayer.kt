@@ -23,7 +23,7 @@ class MusicPlayer {
         INCREASE, DECREASE
     }
     enum class PlayerStatuses {
-        NOT_LOADED, NOT_PLAYING, PLAYING, STOPPED
+        NOT_LOADED, PLAYING, STOPPED
     }
     private val _actualTrackName: MutableLiveData<String?> = MutableLiveData(null)
     val actualTrackName: LiveData<String?>
@@ -33,6 +33,8 @@ class MusicPlayer {
     val playerStatus: LiveData<PlayerStatuses>  // val to other components can react to player changes
         get() = _playerStatus
 
+    private var loadedViewModelData = 0     // var to prevent access not loaded data
+    private var isLoadedPlaylistFail = false    // var to try again load timer when data are loaded
 
     private lateinit var musicViewModel: MusicViewModel
 
@@ -43,9 +45,21 @@ class MusicPlayer {
     fun preparePlayer(context: Context, application: Application, lifecycleOwner: LifecycleOwner){
         parentContext = context
         musicViewModel = MusicViewModel(application)
-        musicViewModel.setNeededBlankDataObservers(lifecycleOwner, listOf(
+        // loop to set observer to all necessary data to work
+        for (data in listOf(
             musicViewModel.selectedThemeInformationEntities, musicViewModel.allThemes,
-            musicViewModel.allThemesTracksReferences, musicViewModel.allTracks))
+            musicViewModel.allThemesTracksReferences, musicViewModel.allTracks)
+        ){
+            data.observe(lifecycleOwner, Observer {
+                if (it != null) {    // to check if all data are loaded before make playlist
+                    loadedViewModelData ++
+                    if (isLoadedPlaylistFail && loadedViewModelData >= 2) {
+                        Log.d(mytag, "preparePlayer: first load not made, try again")
+                        loadMusic()     // if last make playlist fail try again with loaded data
+                    }
+                }
+            })
+        }
     }
 
     fun loadMusic() {
@@ -57,7 +71,7 @@ class MusicPlayer {
     }
 
     private fun loadNewTrack(){
-        Log.d(mytag, "loadNewTrack - start")
+//        Log.d(mytag, "loadNewTrack - start")
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer()
 
@@ -66,7 +80,7 @@ class MusicPlayer {
             if (track != null) {
                 mediaPlayer = MediaPlayer.create(
                     parentContext, Uri.parse(track.value))
-                Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
+//                Log.d(mytag, "loadNewTrack: set actualTrackName as ${track.name}")
                 _actualTrackName.postValue(track.name)
 
 //                _playerStatus.postValue(PlayerStatuses.NOT_PLAYING)
@@ -102,8 +116,8 @@ class MusicPlayer {
     }
 
     private fun changeTrackIndex(operation: IndexOperations): Boolean {
-        Log.d(mytag, "changeTrackIndex - start, index $playlistTrackIndex, " +
-                "operation: $operation")
+//        Log.d(mytag, "changeTrackIndex - start, index $playlistTrackIndex, " +
+//                "operation: $operation")
         if (playList === null){
             return false
         }
@@ -139,8 +153,13 @@ class MusicPlayer {
         return true
     }
 
-    private fun makeActualPlaylist(){
+    private fun makeActualPlaylist(): Boolean{
         Log.d(mytag, "makeActualPlaylist")
+        if (loadedViewModelData < 2){   // if data not loaded stop work
+            Log.d(mytag, "makeActualPlaylist: not all data loaded")
+            isLoadedPlaylistFail = true
+            return false
+        }
         playList = musicViewModel.getSelectedThemeTracks().toTypedArray()
         if (playList?.size == 0){
             playList = null
@@ -148,6 +167,7 @@ class MusicPlayer {
         if (selectedTheme?.random == true) {
             myShuffle(playList)
         }
+        return true
     }
 
     private fun myShuffle(workArray: Array<Track>?){
